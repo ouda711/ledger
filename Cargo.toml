@@ -1,0 +1,12 @@
+[package]
+name = "ledger"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Track income and spending from the command line, with exact money and no dependencies"
+license = "MIT"
+readme = "README.md"
+keywords = ["finance", "budget", "cli", "money", "expenses"]
+categories = ["command-line-utilities"]
+
+[dependencies]
