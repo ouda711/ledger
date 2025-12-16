@@ -54,3 +54,7 @@ impl From<io::Error> for Error {
         Error::Io(err)
     }
 }
+/// Shorthand for building an [`Error::Parse`].
+pub fn parse_error(msg: impl Into<String>) -> Error {
+    Error::Parse(msg.into())
+}
