@@ -32,3 +32,12 @@ const CURRENCIES: &[(&str, u32)] = &[
     ("ZAR", 2),
     ("ZMW", 2),
 ];
+/// Number of decimal places for `code`. Unknown codes are an error, never a default:
+/// guessing two decimals for a currency that has none is a 100x mistake.
+pub fn currency_exponent(code: &str) -> Result<u32> {
+    CURRENCIES
+        .iter()
+        .find(|(c, _)| *c == code)
+        .map(|(_, e)| *e)
+        .ok_or_else(|| Error::UnknownCurrency(code.to_string()))
+}
