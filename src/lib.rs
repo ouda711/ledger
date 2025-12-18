@@ -4,3 +4,4 @@
 //! never as floating point, and amounts in different currencies are never added together.
 
 pub mod error;
+pub mod money;
