@@ -41,3 +41,14 @@ pub fn currency_exponent(code: &str) -> Result<u32> {
         .map(|(_, e)| *e)
         .ok_or_else(|| Error::UnknownCurrency(code.to_string()))
 }
+/// Every supported currency code, alphabetically.
+pub fn supported_currencies() -> impl Iterator<Item = &'static str> {
+    CURRENCIES.iter().map(|(c, _)| *c)
+}
+
+/// Upper-case and validate a currency code.
+pub fn normalise_currency(code: &str) -> Result<String> {
+    let upper = code.trim().to_ascii_uppercase();
+    currency_exponent(&upper)?;
+    Ok(upper)
+}
