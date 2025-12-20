@@ -52,3 +52,11 @@ pub fn normalise_currency(code: &str) -> Result<String> {
     currency_exponent(&upper)?;
     Ok(upper)
 }
+/// An amount of money as a whole count of the currency's minor unit.
+///
+/// Floating point cannot represent decimal money exactly, so it is never used here.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Money {
+    minor: i64,
+    currency: [u8; 3],
+}
