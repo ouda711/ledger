@@ -60,3 +60,41 @@ pub struct Money {
     minor: i64,
     currency: [u8; 3],
 }
+impl Money {
+    /// Build an amount from a count of minor units, e.g. `from_minor(1050, "USD")` is $10.50.
+    pub fn from_minor(minor: i64, currency: &str) -> Result<Money> {
+        let code = normalise_currency(currency)?;
+        let bytes = code.as_bytes();
+        Ok(Money {
+            minor,
+            currency: [bytes[0], bytes[1], bytes[2]],
+        })
+    }
+
+    /// Zero in the given currency.
+    pub fn zero(currency: &str) -> Result<Money> {
+        Money::from_minor(0, currency)
+    }
+
+    /// The amount in minor units.
+    pub fn minor(&self) -> i64 {
+        self.minor
+    }
+
+    /// The ISO 4217 code.
+    pub fn currency(&self) -> &str {
+        std::str::from_utf8(&self.currency).expect("currency codes are ascii")
+    }
+
+    fn exponent(&self) -> u32 {
+        currency_exponent(self.currency()).expect("currency validated on construction")
+    }
+
+    pub fn is_negative(&self) -> bool {
+        self.minor < 0
+    }
+
+    pub fn is_zero(&self) -> bool {
+        self.minor == 0
+    }
+}
