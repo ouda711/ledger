@@ -98,3 +98,48 @@ impl Money {
         self.minor == 0
     }
 }
+impl Money {
+    /// Parse text such as `"1,234.50"`, `"-12"` or `".5"` into minor units.
+    ///
+    /// More decimals than the currency has is refused rather than rounded: `10.005 KES`
+    /// is a typo, and silently resolving it is how a cent goes missing.
+    pub fn parse(text: &str, currency: &str) -> Result<Money> {
+        let code = normalise_currency(currency)?;
+        let exp = currency_exponent(&code)?;
+        let cleaned: String = text
+            .trim()
+            .chars()
+            .filter(|c| *c != ',' && *c != '_')
+            .collect();
+        let (negative, body) = match cleaned.strip_prefix('-') {
+            Some(rest) => (true, rest),
+            None => (false, cleaned.strip_prefix('+').unwrap_or(cleaned.as_str())),
+        };
+        let invalid = || parse_error(format!("'{}' is not an amount", text.trim()));
+        if body.is_empty() {
+            return Err(invalid());
+        }
+        let (whole, frac) = match body.split_once('.') {
+            Some((_, "")) => return Err(invalid()),
+            Some((w, f)) => (w, f),
+            None => (body, ""),
+        };
+        let digits_only = |s: &str| s.chars().all(|c| c.is_ascii_digit());
+        if !digits_only(whole) || !digits_only(frac) {
+            return Err(invalid());
+        }
+        if frac.len() as u32 > exp {
+            return Err(parse_error(format!(
+                "'{}' has more than {exp} decimal place(s), which {code} does not allow",
+                text.trim()
+            )));
+        }
+        let mut digits = String::from(if whole.is_empty() { "0" } else { whole });
+        digits.push_str(frac);
+        for _ in frac.len() as u32..exp {
+            digits.push('0');
+        }
+        let value: i64 = digits.parse().map_err(|_| Error::Overflow)?;
+        Money::from_minor(if negative { -value } else { value }, &code)
+    }
+}
