@@ -25,3 +25,10 @@ fn parses_whole_and_fractional_amounts() {
     assert_eq!(m("12.05", "KES").minor(), 1205);
     assert_eq!(m(".5", "KES").minor(), 50);
 }
+#[test]
+fn parses_signs_and_thousand_separators() {
+    assert_eq!(m("-3.20", "USD").minor(), -320);
+    assert_eq!(m("+3", "USD").minor(), 300);
+    assert_eq!(m("1,234,567.89", "USD").minor(), 123_456_789);
+    assert_eq!(m("1_000", "USD").minor(), 100_000);
+}
