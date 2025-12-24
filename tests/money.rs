@@ -32,3 +32,8 @@ fn parses_signs_and_thousand_separators() {
     assert_eq!(m("1,234,567.89", "USD").minor(), 123_456_789);
     assert_eq!(m("1_000", "USD").minor(), 100_000);
 }
+#[test]
+fn currencies_without_minor_units() {
+    assert_eq!(m("5000", "UGX").minor(), 5000);
+    assert!(Money::parse("5000.5", "UGX").is_err());
+}
