@@ -37,3 +37,8 @@ fn currencies_without_minor_units() {
     assert_eq!(m("5000", "UGX").minor(), 5000);
     assert!(Money::parse("5000.5", "UGX").is_err());
 }
+#[test]
+fn three_decimal_currencies() {
+    assert_eq!(m("1.234", "KWD").minor(), 1234);
+    assert_eq!(m("1.2", "KWD").minor(), 1200);
+}
