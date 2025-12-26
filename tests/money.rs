@@ -42,3 +42,8 @@ fn three_decimal_currencies() {
     assert_eq!(m("1.234", "KWD").minor(), 1234);
     assert_eq!(m("1.2", "KWD").minor(), 1200);
 }
+#[test]
+fn excess_precision_is_refused_not_rounded() {
+    let err = Money::parse("10.005", "KES").unwrap_err();
+    assert!(err.to_string().contains("decimal place"));
+}
