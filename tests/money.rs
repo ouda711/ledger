@@ -47,3 +47,9 @@ fn excess_precision_is_refused_not_rounded() {
     let err = Money::parse("10.005", "KES").unwrap_err();
     assert!(err.to_string().contains("decimal place"));
 }
+#[test]
+fn rejects_malformed_amounts() {
+    for bad in ["", "-", "abc", "1.2.3", "1.", "1e5", "--1", "12 34"] {
+        assert!(Money::parse(bad, "USD").is_err(), "accepted {bad:?}");
+    }
+}
