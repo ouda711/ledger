@@ -53,3 +53,10 @@ fn rejects_malformed_amounts() {
         assert!(Money::parse(bad, "USD").is_err(), "accepted {bad:?}");
     }
 }
+#[test]
+fn huge_amounts_overflow_cleanly() {
+    assert!(matches!(
+        Money::parse("99999999999999999999", "USD"),
+        Err(Error::Overflow)
+    ));
+}
