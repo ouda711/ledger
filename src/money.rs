@@ -143,3 +143,17 @@ impl Money {
         Money::from_minor(if negative { -value } else { value }, &code)
     }
 }
+impl Money {
+    /// The amount as a plain decimal with exactly the currency's places, e.g. `"-1234.50"`.
+    pub fn to_decimal(&self) -> String {
+        let exp = self.exponent() as usize;
+        let sign = if self.minor < 0 { "-" } else { "" };
+        let digits = self.minor.unsigned_abs().to_string();
+        if exp == 0 {
+            return format!("{sign}{digits}");
+        }
+        let padded = format!("{:0>width$}", digits, width = exp + 1);
+        let (whole, frac) = padded.split_at(padded.len() - exp);
+        format!("{sign}{whole}.{frac}")
+    }
+}
