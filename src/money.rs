@@ -157,3 +157,32 @@ impl Money {
         format!("{sign}{whole}.{frac}")
     }
 }
+fn group_thousands(digits: &str) -> String {
+    let mut out = String::with_capacity(digits.len() + digits.len() / 3);
+    for (i, c) in digits.chars().enumerate() {
+        if i > 0 && (digits.len() - i) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
+}
+
+impl fmt::Display for Money {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let decimal = self.to_decimal();
+        let (sign, rest) = match decimal.strip_prefix('-') {
+            Some(r) => ("-", r),
+            None => ("", decimal.as_str()),
+        };
+        let (whole, frac) = match rest.split_once('.') {
+            Some((w, fr)) => (w, Some(fr)),
+            None => (rest, None),
+        };
+        write!(f, "{} {sign}{}", self.currency(), group_thousands(whole))?;
+        if let Some(fr) = frac {
+            write!(f, ".{fr}")?;
+        }
+        Ok(())
+    }
+}
