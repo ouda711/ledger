@@ -60,3 +60,10 @@ fn huge_amounts_overflow_cleanly() {
         Err(Error::Overflow)
     ));
 }
+#[test]
+fn formats_as_plain_decimal() {
+    assert_eq!(m("1234.5", "USD").to_decimal(), "1234.50");
+    assert_eq!(m("-0.07", "USD").to_decimal(), "-0.07");
+    assert_eq!(m("7", "UGX").to_decimal(), "7");
+    assert_eq!(m("0.001", "BHD").to_decimal(), "0.001");
+}
