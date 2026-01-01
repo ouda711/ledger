@@ -186,3 +186,37 @@ impl fmt::Display for Money {
         Ok(())
     }
 }
+impl Money {
+    fn same_currency(&self, other: &Money) -> Result<()> {
+        if self.currency == other.currency {
+            Ok(())
+        } else {
+            Err(Error::CurrencyMismatch {
+                left: self.currency().to_string(),
+                right: other.currency().to_string(),
+            })
+        }
+    }
+
+    pub fn checked_add(&self, other: &Money) -> Result<Money> {
+        self.same_currency(other)?;
+        let minor = self.minor.checked_add(other.minor).ok_or(Error::Overflow)?;
+        Ok(Money { minor, ..*self })
+    }
+
+    pub fn checked_sub(&self, other: &Money) -> Result<Money> {
+        self.same_currency(other)?;
+        let minor = self.minor.checked_sub(other.minor).ok_or(Error::Overflow)?;
+        Ok(Money { minor, ..*self })
+    }
+
+    pub fn negate(&self) -> Result<Money> {
+        let minor = self.minor.checked_neg().ok_or(Error::Overflow)?;
+        Ok(Money { minor, ..*self })
+    }
+
+    pub fn abs(&self) -> Result<Money> {
+        let minor = self.minor.checked_abs().ok_or(Error::Overflow)?;
+        Ok(Money { minor, ..*self })
+    }
+}
