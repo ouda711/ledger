@@ -67,3 +67,9 @@ fn formats_as_plain_decimal() {
     assert_eq!(m("7", "UGX").to_decimal(), "7");
     assert_eq!(m("0.001", "BHD").to_decimal(), "0.001");
 }
+#[test]
+fn displays_with_currency_and_grouping() {
+    assert_eq!(m("1234567.89", "KES").to_string(), "KES 1,234,567.89");
+    assert_eq!(m("-1000", "XOF").to_string(), "XOF -1,000");
+    assert_eq!(m("999", "USD").to_string(), "USD 999.00");
+}
