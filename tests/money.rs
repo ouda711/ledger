@@ -73,3 +73,14 @@ fn displays_with_currency_and_grouping() {
     assert_eq!(m("-1000", "XOF").to_string(), "XOF -1,000");
     assert_eq!(m("999", "USD").to_string(), "USD 999.00");
 }
+#[test]
+fn parse_and_format_round_trip() {
+    for (text, currency) in [
+        ("0.10", "USD"),
+        ("123.456", "OMR"),
+        ("-42", "RWF"),
+        ("1000000.00", "NGN"),
+    ] {
+        assert_eq!(m(text, currency).to_decimal(), text);
+    }
+}
