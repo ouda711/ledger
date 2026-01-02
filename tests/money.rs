@@ -84,3 +84,8 @@ fn parse_and_format_round_trip() {
         assert_eq!(m(text, currency).to_decimal(), text);
     }
 }
+#[test]
+fn addition_is_exact() {
+    let total = m("0.1", "USD").checked_add(&m("0.2", "USD")).unwrap();
+    assert_eq!(total, m("0.3", "USD"));
+}
