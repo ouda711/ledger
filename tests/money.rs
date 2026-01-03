@@ -89,3 +89,9 @@ fn addition_is_exact() {
     let total = m("0.1", "USD").checked_add(&m("0.2", "USD")).unwrap();
     assert_eq!(total, m("0.3", "USD"));
 }
+#[test]
+fn different_currencies_never_mix() {
+    let err = m("1", "USD").checked_add(&m("1", "EUR")).unwrap_err();
+    assert!(matches!(err, Error::CurrencyMismatch { .. }));
+    assert!(m("1", "USD").checked_sub(&m("1", "KES")).is_err());
+}
