@@ -106,3 +106,8 @@ fn arithmetic_overflow_is_reported() {
     assert!(min.negate().is_err());
     assert!(min.abs().is_err());
 }
+#[test]
+fn negate_and_abs() {
+    assert_eq!(m("5", "USD").negate().unwrap(), m("-5", "USD"));
+    assert_eq!(m("-5", "USD").abs().unwrap(), m("5", "USD"));
+}
