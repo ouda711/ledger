@@ -95,3 +95,14 @@ fn different_currencies_never_mix() {
     assert!(matches!(err, Error::CurrencyMismatch { .. }));
     assert!(m("1", "USD").checked_sub(&m("1", "KES")).is_err());
 }
+#[test]
+fn arithmetic_overflow_is_reported() {
+    let max = Money::from_minor(i64::MAX, "USD").unwrap();
+    assert!(matches!(
+        max.checked_add(&m("0.01", "USD")),
+        Err(Error::Overflow)
+    ));
+    let min = Money::from_minor(i64::MIN, "USD").unwrap();
+    assert!(min.negate().is_err());
+    assert!(min.abs().is_err());
+}
