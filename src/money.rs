@@ -227,3 +227,14 @@ impl Money {
         Ok(self.minor.cmp(&other.minor))
     }
 }
+/// Total of `items`, all of which must be in `currency`.
+pub fn sum<'a, I>(currency: &str, items: I) -> Result<Money>
+where
+    I: IntoIterator<Item = &'a Money>,
+{
+    let mut total = Money::zero(currency)?;
+    for m in items {
+        total = total.checked_add(m)?;
+    }
+    Ok(total)
+}
