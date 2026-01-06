@@ -220,3 +220,10 @@ impl Money {
         Ok(Money { minor, ..*self })
     }
 }
+impl Money {
+    /// Order two amounts; comparing different currencies is an error, not `false`.
+    pub fn compare(&self, other: &Money) -> Result<Ordering> {
+        self.same_currency(other)?;
+        Ok(self.minor.cmp(&other.minor))
+    }
+}
