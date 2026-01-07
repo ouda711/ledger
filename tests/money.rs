@@ -111,3 +111,10 @@ fn negate_and_abs() {
     assert_eq!(m("5", "USD").negate().unwrap(), m("-5", "USD"));
     assert_eq!(m("-5", "USD").abs().unwrap(), m("5", "USD"));
 }
+#[test]
+fn three_instalments_settle_an_obligation_exactly() {
+    let paid = [m("336.70", "KES"), m("336.70", "KES"), m("336.70", "KES")];
+    let total = money::sum("KES", &paid).unwrap();
+    let outstanding = m("1010.10", "KES").checked_sub(&total).unwrap();
+    assert!(outstanding.is_zero());
+}
