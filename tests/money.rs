@@ -118,3 +118,12 @@ fn three_instalments_settle_an_obligation_exactly() {
     let outstanding = m("1010.10", "KES").checked_sub(&total).unwrap();
     assert!(outstanding.is_zero());
 }
+#[test]
+fn comparison_requires_same_currency() {
+    use std::cmp::Ordering;
+    assert_eq!(
+        m("2", "USD").compare(&m("1", "USD")).unwrap(),
+        Ordering::Greater
+    );
+    assert!(m("2", "USD").compare(&m("1", "GBP")).is_err());
+}
