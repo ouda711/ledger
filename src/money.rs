@@ -238,3 +238,30 @@ where
     }
     Ok(total)
 }
+impl Money {
+    /// `basis_points / 10_000` of this amount, rounded half away from zero.
+    /// 1.5% is 150 basis points.
+    pub fn percent_bp(&self, basis_points: i64) -> Result<Money> {
+        let product = self.minor as i128 * basis_points as i128;
+        let quotient = product / 10_000;
+        let remainder = product % 10_000;
+        let rounded = if remainder.abs() * 2 >= 10_000 {
+            quotient + product.signum()
+        } else {
+            quotient
+        };
+        let minor = i64::try_from(rounded).map_err(|_| Error::Overflow)?;
+        Ok(Money { minor, ..*self })
+    }
+
+    /// How much of `whole` this amount is, in basis points (10_000 = 100%).
+    /// `None` when `whole` is zero.
+    pub fn ratio_bp(&self, whole: &Money) -> Result<Option<i64>> {
+        self.same_currency(whole)?;
+        if whole.minor == 0 {
+            return Ok(None);
+        }
+        let ratio = (self.minor as i128 * 10_000) / whole.minor as i128;
+        Ok(Some(i64::try_from(ratio).map_err(|_| Error::Overflow)?))
+    }
+}
