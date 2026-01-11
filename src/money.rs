@@ -265,3 +265,9 @@ impl Money {
         Ok(Some(i64::try_from(ratio).map_err(|_| Error::Overflow)?))
     }
 }
+/// `1234` basis points as `"12.34%"`.
+pub fn format_bp(bp: i64) -> String {
+    let sign = if bp < 0 { "-" } else { "" };
+    let abs = bp.unsigned_abs();
+    format!("{sign}{}.{:02}%", abs / 100, abs % 100)
+}
