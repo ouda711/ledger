@@ -127,3 +127,13 @@ fn comparison_requires_same_currency() {
     );
     assert!(m("2", "USD").compare(&m("1", "GBP")).is_err());
 }
+#[test]
+fn percentages_round_half_away_from_zero() {
+    assert_eq!(m("10.00", "USD").percent_bp(150).unwrap(), m("0.15", "USD"));
+    assert_eq!(m("0.05", "USD").percent_bp(5000).unwrap(), m("0.03", "USD"));
+    assert_eq!(
+        m("-0.05", "USD").percent_bp(5000).unwrap(),
+        m("-0.03", "USD")
+    );
+    assert_eq!(m("0.04", "USD").percent_bp(5000).unwrap(), m("0.02", "USD"));
+}
