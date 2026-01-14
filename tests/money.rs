@@ -137,3 +137,13 @@ fn percentages_round_half_away_from_zero() {
     );
     assert_eq!(m("0.04", "USD").percent_bp(5000).unwrap(), m("0.02", "USD"));
 }
+#[test]
+fn ratio_in_basis_points() {
+    assert_eq!(
+        m("25", "USD").ratio_bp(&m("100", "USD")).unwrap(),
+        Some(2500)
+    );
+    assert_eq!(m("25", "USD").ratio_bp(&m("0", "USD")).unwrap(), None);
+    assert_eq!(money::format_bp(2500), "25.00%");
+    assert_eq!(money::format_bp(-7), "-0.07%");
+}
