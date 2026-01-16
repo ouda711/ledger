@@ -147,3 +147,14 @@ fn ratio_in_basis_points() {
     assert_eq!(money::format_bp(2500), "25.00%");
     assert_eq!(money::format_bp(-7), "-0.07%");
 }
+#[test]
+fn supported_currencies_are_sorted_and_valid() {
+    let codes: Vec<&str> = money::supported_currencies().collect();
+    let mut sorted = codes.clone();
+    sorted.sort();
+    assert_eq!(codes, sorted);
+    for code in codes {
+        assert_eq!(code.len(), 3);
+        assert!(money::currency_exponent(code).unwrap() <= 3);
+    }
+}
