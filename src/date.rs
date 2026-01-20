@@ -23,3 +23,32 @@ pub fn days_in_month(year: i32, month: u8) -> u8 {
         _ => 0,
     }
 }
+impl Date {
+    /// A date, refusing ones that do not exist such as 2023-02-29.
+    pub fn new(year: i32, month: u8, day: u8) -> Result<Date> {
+        if !(1..=9999).contains(&year) {
+            return Err(parse_error(format!("year {year} is out of range")));
+        }
+        if !(1..=12).contains(&month) {
+            return Err(parse_error(format!("month {month} does not exist")));
+        }
+        if day == 0 || day > days_in_month(year, month) {
+            return Err(parse_error(format!(
+                "{year:04}-{month:02} has no day {day}"
+            )));
+        }
+        Ok(Date { year, month, day })
+    }
+
+    pub fn year(&self) -> i32 {
+        self.year
+    }
+
+    pub fn month(&self) -> u8 {
+        self.month
+    }
+
+    pub fn day(&self) -> u8 {
+        self.day
+    }
+}
