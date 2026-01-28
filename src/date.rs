@@ -52,3 +52,21 @@ impl Date {
         self.day
     }
 }
+impl Date {
+    /// Parse `YYYY-MM-DD`.
+    pub fn parse(text: &str) -> Result<Date> {
+        let t = text.trim();
+        let bad = || parse_error(format!("expected a date like 2024-03-31, got '{t}'"));
+        let parts: Vec<&str> = t.split('-').collect();
+        if parts.len() != 3 || parts[0].len() != 4 || parts[1].len() != 2 || parts[2].len() != 2 {
+            return Err(bad());
+        }
+        if !parts.iter().all(|p| p.chars().all(|c| c.is_ascii_digit())) {
+            return Err(bad());
+        }
+        let year = parts[0].parse().map_err(|_| bad())?;
+        let month = parts[1].parse().map_err(|_| bad())?;
+        let day = parts[2].parse().map_err(|_| bad())?;
+        Date::new(year, month, day)
+    }
+}
