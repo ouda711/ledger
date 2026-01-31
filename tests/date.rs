@@ -22,3 +22,18 @@ fn impossible_dates_are_refused() {
     assert!(Date::new(0, 1, 1).is_err());
     assert!(Date::new(2024, 2, 29).is_ok());
 }
+#[test]
+fn parses_iso_dates() {
+    let date = d("2024-03-09");
+    assert_eq!((date.year(), date.month(), date.day()), (2024, 3, 9));
+    for bad in [
+        "2024-3-9",
+        "24-03-09",
+        "2024/03/09",
+        "2024-03-09x",
+        "",
+        "abcd-ef-gh",
+    ] {
+        assert!(Date::parse(bad).is_err(), "accepted {bad:?}");
+    }
+}
