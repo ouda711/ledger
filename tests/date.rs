@@ -37,3 +37,8 @@ fn parses_iso_dates() {
         assert!(Date::parse(bad).is_err(), "accepted {bad:?}");
     }
 }
+#[test]
+fn displays_in_iso_format() {
+    assert_eq!(Date::new(987, 1, 2).unwrap().to_string(), "0987-01-02");
+    assert_eq!(d("2024-12-31").to_string(), "2024-12-31");
+}
