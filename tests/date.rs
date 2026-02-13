@@ -42,3 +42,10 @@ fn displays_in_iso_format() {
     assert_eq!(Date::new(987, 1, 2).unwrap().to_string(), "0987-01-02");
     assert_eq!(d("2024-12-31").to_string(), "2024-12-31");
 }
+#[test]
+fn day_numbers_known_values() {
+    assert_eq!(d("1970-01-01").to_days(), 0);
+    assert_eq!(d("1970-01-02").to_days(), 1);
+    assert_eq!(d("1969-12-31").to_days(), -1);
+    assert_eq!(d("2000-03-01").to_days(), 11_017);
+}
