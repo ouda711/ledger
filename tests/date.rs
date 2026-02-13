@@ -49,3 +49,10 @@ fn day_numbers_known_values() {
     assert_eq!(d("1969-12-31").to_days(), -1);
     assert_eq!(d("2000-03-01").to_days(), 11_017);
 }
+#[test]
+fn day_numbers_round_trip_over_four_centuries() {
+    let start = d("1900-01-01").to_days();
+    for n in (start..start + 146_097).step_by(97) {
+        assert_eq!(Date::from_days(n).unwrap().to_days(), n);
+    }
+}
