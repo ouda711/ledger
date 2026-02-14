@@ -104,3 +104,18 @@ impl Date {
         Date::new(year, month as u8, day as u8)
     }
 }
+impl Date {
+    pub fn add_days(&self, n: i64) -> Result<Date> {
+        Date::from_days(self.to_days().checked_add(n).ok_or(Error::Overflow)?)
+    }
+
+    /// Whole days from `self` to `other`; negative when `other` is earlier.
+    pub fn days_until(&self, other: &Date) -> i64 {
+        other.to_days() - self.to_days()
+    }
+
+    /// Monday is 0, Sunday is 6. 1970-01-01 was a Thursday.
+    pub fn weekday(&self) -> u8 {
+        (self.to_days() + 3).rem_euclid(7) as u8
+    }
+}
