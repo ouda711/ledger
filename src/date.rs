@@ -119,3 +119,29 @@ impl Date {
         (self.to_days() + 3).rem_euclid(7) as u8
     }
 }
+impl Date {
+    /// `n` months later (or earlier). Jan 31 plus one month is Feb 28/29, not Mar 3.
+    pub fn add_months(&self, n: i32) -> Result<Date> {
+        let total = self
+            .year
+            .checked_mul(12)
+            .and_then(|t| t.checked_add(self.month as i32 - 1))
+            .and_then(|t| t.checked_add(n))
+            .ok_or(Error::Overflow)?;
+        let year = total.div_euclid(12);
+        let month = (total.rem_euclid(12) + 1) as u8;
+        let day = self.day.min(days_in_month(year, month));
+        Date::new(year, month, day)
+    }
+
+    pub fn first_of_month(&self) -> Date {
+        Date { day: 1, ..*self }
+    }
+
+    pub fn last_of_month(&self) -> Date {
+        Date {
+            day: days_in_month(self.year, self.month),
+            ..*self
+        }
+    }
+}
