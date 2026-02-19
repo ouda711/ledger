@@ -56,3 +56,11 @@ fn day_numbers_round_trip_over_four_centuries() {
         assert_eq!(Date::from_days(n).unwrap().to_days(), n);
     }
 }
+#[test]
+fn add_days_crosses_months_and_years() {
+    assert_eq!(d("2024-02-28").add_days(1).unwrap(), d("2024-02-29"));
+    assert_eq!(d("2023-02-28").add_days(1).unwrap(), d("2023-03-01"));
+    assert_eq!(d("2024-12-31").add_days(1).unwrap(), d("2025-01-01"));
+    assert_eq!(d("2025-01-01").add_days(-1).unwrap(), d("2024-12-31"));
+    assert_eq!(d("2024-01-01").days_until(&d("2025-01-01")), 366);
+}
