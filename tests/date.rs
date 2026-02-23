@@ -70,3 +70,12 @@ fn weekdays() {
     assert_eq!(d("2024-03-04").weekday(), 0);
     assert_eq!(d("2024-03-10").weekday(), 6);
 }
+#[test]
+fn add_months_clamps_to_month_end() {
+    assert_eq!(d("2024-01-31").add_months(1).unwrap(), d("2024-02-29"));
+    assert_eq!(d("2023-01-31").add_months(1).unwrap(), d("2023-02-28"));
+    assert_eq!(d("2024-03-31").add_months(-1).unwrap(), d("2024-02-29"));
+    assert_eq!(d("2024-11-15").add_months(3).unwrap(), d("2025-02-15"));
+    assert_eq!(d("2024-05-20").last_of_month(), d("2024-05-31"));
+    assert_eq!(d("2024-05-20").first_of_month(), d("2024-05-01"));
+}
