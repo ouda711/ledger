@@ -190,3 +190,8 @@ impl Month {
         date.year == self.year && date.month == self.month
     }
 }
+impl fmt::Display for Month {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:04}-{:02}", self.year, self.month)
+    }
+}
