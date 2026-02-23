@@ -145,3 +145,48 @@ impl Date {
         }
     }
 }
+/// A calendar month, used to group and filter transactions.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Month {
+    pub year: i32,
+    pub month: u8,
+}
+
+impl Month {
+    pub fn of(date: &Date) -> Month {
+        Month {
+            year: date.year,
+            month: date.month,
+        }
+    }
+
+    /// Parse `YYYY-MM`.
+    pub fn parse(text: &str) -> Result<Month> {
+        let t = text.trim();
+        let bad = || parse_error(format!("expected a month like 2024-03, got '{t}'"));
+        let (y, m) = t.split_once('-').ok_or_else(bad)?;
+        if y.len() != 4 || m.len() != 2 {
+            return Err(bad());
+        }
+        let year: i32 = y.parse().map_err(|_| bad())?;
+        let month: u8 = m.parse().map_err(|_| bad())?;
+        Date::new(year, month, 1)?;
+        Ok(Month { year, month })
+    }
+
+    pub fn first_day(&self) -> Date {
+        Date {
+            year: self.year,
+            month: self.month,
+            day: 1,
+        }
+    }
+
+    pub fn last_day(&self) -> Date {
+        self.first_day().last_of_month()
+    }
+
+    pub fn contains(&self, date: &Date) -> bool {
+        date.year == self.year && date.month == self.month
+    }
+}
