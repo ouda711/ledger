@@ -64,3 +64,9 @@ fn add_days_crosses_months_and_years() {
     assert_eq!(d("2025-01-01").add_days(-1).unwrap(), d("2024-12-31"));
     assert_eq!(d("2024-01-01").days_until(&d("2025-01-01")), 366);
 }
+#[test]
+fn weekdays() {
+    assert_eq!(d("1970-01-01").weekday(), 3);
+    assert_eq!(d("2024-03-04").weekday(), 0);
+    assert_eq!(d("2024-03-10").weekday(), 6);
+}
