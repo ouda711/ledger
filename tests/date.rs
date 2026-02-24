@@ -79,3 +79,15 @@ fn add_months_clamps_to_month_end() {
     assert_eq!(d("2024-05-20").last_of_month(), d("2024-05-31"));
     assert_eq!(d("2024-05-20").first_of_month(), d("2024-05-01"));
 }
+#[test]
+fn months_parse_and_bound_dates() {
+    use ledger::date::Month;
+    let month = Month::parse("2024-02").unwrap();
+    assert_eq!(month.to_string(), "2024-02");
+    assert_eq!(month.first_day(), d("2024-02-01"));
+    assert_eq!(month.last_day(), d("2024-02-29"));
+    assert!(month.contains(&d("2024-02-15")));
+    assert!(!month.contains(&d("2024-03-01")));
+    assert!(Month::parse("2024-13").is_err());
+    assert!(Month::parse("2024").is_err());
+}
