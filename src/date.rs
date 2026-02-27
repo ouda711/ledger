@@ -195,3 +195,12 @@ impl fmt::Display for Month {
         write!(f, "{:04}-{:02}", self.year, self.month)
     }
 }
+impl Month {
+    pub fn next(&self) -> Result<Month> {
+        Ok(Month::of(&self.first_day().add_months(1)?))
+    }
+
+    pub fn previous(&self) -> Result<Month> {
+        Ok(Month::of(&self.first_day().add_months(-1)?))
+    }
+}
