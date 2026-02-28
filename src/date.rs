@@ -204,3 +204,12 @@ impl Month {
         Ok(Month::of(&self.first_day().add_months(-1)?))
     }
 }
+/// Today in UTC.
+pub fn today() -> Date {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let secs = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0);
+    Date::from_days(secs.div_euclid(86_400)).expect("system clock within year 9999")
+}
