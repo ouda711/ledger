@@ -91,3 +91,10 @@ fn months_parse_and_bound_dates() {
     assert!(Month::parse("2024-13").is_err());
     assert!(Month::parse("2024").is_err());
 }
+#[test]
+fn next_and_previous_month() {
+    use ledger::date::Month;
+    let dec = Month::parse("2024-12").unwrap();
+    assert_eq!(dec.next().unwrap().to_string(), "2025-01");
+    assert_eq!(dec.previous().unwrap().to_string(), "2024-11");
+}
