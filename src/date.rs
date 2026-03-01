@@ -213,3 +213,15 @@ pub fn today() -> Date {
         .unwrap_or(0);
     Date::from_days(secs.div_euclid(86_400)).expect("system clock within year 9999")
 }
+/// Parse `today`, `yesterday`, `-3` (days ago) or an ISO date, relative to `now`.
+pub fn parse_relative(text: &str, now: Date) -> Result<Date> {
+    match text.trim().to_ascii_lowercase().as_str() {
+        "today" => Ok(now),
+        "yesterday" => now.add_days(-1),
+        t if t.starts_with('-') && t[1..].chars().all(|c| c.is_ascii_digit()) && t.len() > 1 => {
+            let n: i64 = t[1..].parse().map_err(|_| Error::Overflow)?;
+            now.add_days(-n)
+        }
+        _ => Date::parse(text),
+    }
+}
