@@ -22,3 +22,8 @@ currency code, never as floating point. That means:
   are handled correctly.
 - Typing more decimals than a currency has (`10.005` KES) is an error, not silently rounded.
 - Amounts in different currencies are never added together. Reports show one line per currency.
+
+## Dates
+
+Anywhere a date is accepted you can write `2024-03-31`, `today`, `yesterday`, or `-3`
+(three days ago).
