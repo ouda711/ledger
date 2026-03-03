@@ -98,3 +98,14 @@ fn next_and_previous_month() {
     assert_eq!(dec.next().unwrap().to_string(), "2025-01");
     assert_eq!(dec.previous().unwrap().to_string(), "2024-11");
 }
+#[test]
+fn relative_dates() {
+    use ledger::date::parse_relative;
+    let now = d("2024-03-01");
+    assert_eq!(parse_relative("today", now).unwrap(), now);
+    assert_eq!(parse_relative("Yesterday", now).unwrap(), d("2024-02-29"));
+    assert_eq!(parse_relative("-7", now).unwrap(), d("2024-02-23"));
+    assert_eq!(parse_relative("2023-01-01", now).unwrap(), d("2023-01-01"));
+    assert!(parse_relative("-", now).is_err());
+    assert!(parse_relative("soon", now).is_err());
+}
