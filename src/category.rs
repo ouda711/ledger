@@ -30,3 +30,27 @@ impl fmt::Display for Category {
         f.write_str(&self.0)
     }
 }
+impl Category {
+    /// `food/groceries` -> `food`; `None` for a top-level category.
+    pub fn parent(&self) -> Option<Category> {
+        self.0
+            .rsplit_once('/')
+            .map(|(parent, _)| Category(parent.to_string()))
+    }
+
+    /// The first segment: `food/groceries/fruit` -> `food`.
+    pub fn top(&self) -> Category {
+        Category(self.0.split('/').next().unwrap_or_default().to_string())
+    }
+
+    /// True when `self` is `other` or nested anywhere beneath it.
+    pub fn is_within(&self, other: &Category) -> bool {
+        self.0 == other.0
+            || (self.0.starts_with(&other.0) && self.0[other.0.len()..].starts_with('/'))
+    }
+
+    /// Nesting depth: `food` is 1, `food/groceries` is 2.
+    pub fn depth(&self) -> usize {
+        self.0.split('/').count()
+    }
+}
