@@ -15,3 +15,11 @@ fn empty_segments_are_invalid() {
         assert!(Category::new(bad).is_err(), "accepted {bad:?}");
     }
 }
+#[test]
+fn hierarchy() {
+    let fruit = c("food/groceries/fruit");
+    assert_eq!(fruit.parent(), Some(c("food/groceries")));
+    assert_eq!(fruit.top(), c("food"));
+    assert_eq!(fruit.depth(), 3);
+    assert_eq!(c("food").parent(), None);
+}
