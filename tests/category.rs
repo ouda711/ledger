@@ -23,3 +23,10 @@ fn hierarchy() {
     assert_eq!(fruit.depth(), 3);
     assert_eq!(c("food").parent(), None);
 }
+#[test]
+fn is_within_respects_segment_boundaries() {
+    assert!(c("food/groceries").is_within(&c("food")));
+    assert!(c("food").is_within(&c("food")));
+    assert!(!c("foodstuff").is_within(&c("food")));
+    assert!(!c("food").is_within(&c("food/groceries")));
+}
