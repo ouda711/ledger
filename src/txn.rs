@@ -28,3 +28,14 @@ impl Kind {
         }
     }
 }
+/// One movement of money. `amount` is always positive; `kind` gives the direction.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Transaction {
+    pub id: u64,
+    pub date: Date,
+    pub kind: Kind,
+    pub amount: Money,
+    pub category: Category,
+    pub note: String,
+    pub tags: Vec<String>,
+}
