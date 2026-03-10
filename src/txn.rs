@@ -39,3 +39,18 @@ pub struct Transaction {
     pub note: String,
     pub tags: Vec<String>,
 }
+fn normalise_tag(tag: &str) -> String {
+    tag.trim().trim_start_matches('#').to_lowercase()
+}
+
+/// Split `"#trip, Work,trip"` into sorted, de-duplicated tags: `["trip", "work"]`.
+pub fn parse_tags(text: &str) -> Vec<String> {
+    let mut tags: Vec<String> = text
+        .split(',')
+        .map(normalise_tag)
+        .filter(|t| !t.is_empty())
+        .collect();
+    tags.sort();
+    tags.dedup();
+    tags
+}
