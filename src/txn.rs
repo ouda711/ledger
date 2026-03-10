@@ -54,3 +54,17 @@ pub fn parse_tags(text: &str) -> Vec<String> {
     tags.dedup();
     tags
 }
+impl Transaction {
+    /// Positive for income, negative for expenses.
+    pub fn signed(&self) -> Result<Money> {
+        match self.kind {
+            Kind::Income => Ok(self.amount),
+            Kind::Expense => self.amount.negate(),
+        }
+    }
+
+    pub fn has_tag(&self, tag: &str) -> bool {
+        let wanted = normalise_tag(tag);
+        self.tags.contains(&wanted)
+    }
+}
