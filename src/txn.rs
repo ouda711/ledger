@@ -78,3 +78,38 @@ pub struct NewTransaction {
     pub note: String,
     pub tags: Vec<String>,
 }
+impl NewTransaction {
+    pub fn validate(&self) -> Result<()> {
+        validate_amount(&self.amount)?;
+        validate_note(&self.note)
+    }
+
+    /// Attach an id, producing a stored transaction.
+    pub fn into_transaction(self, id: u64) -> Transaction {
+        Transaction {
+            id,
+            date: self.date,
+            kind: self.kind,
+            amount: self.amount,
+            category: self.category,
+            note: self.note,
+            tags: self.tags,
+        }
+    }
+}
+
+pub(crate) fn validate_amount(amount: &Money) -> Result<()> {
+    if amount.is_negative() || amount.is_zero() {
+        return Err(parse_error(
+            "amount must be greater than zero; choose income or expense for the direction",
+        ));
+    }
+    Ok(())
+}
+
+pub(crate) fn validate_note(note: &str) -> Result<()> {
+    if note.chars().any(|c| c == '\n' || c == '\r') {
+        return Err(parse_error("notes must be a single line"));
+    }
+    Ok(())
+}
