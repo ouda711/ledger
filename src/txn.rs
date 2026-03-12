@@ -68,3 +68,13 @@ impl Transaction {
         self.tags.contains(&wanted)
     }
 }
+/// Everything needed to record a transaction; the ledger assigns the id.
+#[derive(Debug, Clone, PartialEq)]
+pub struct NewTransaction {
+    pub date: Date,
+    pub kind: Kind,
+    pub amount: Money,
+    pub category: Category,
+    pub note: String,
+    pub tags: Vec<String>,
+}
