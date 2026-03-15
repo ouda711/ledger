@@ -21,3 +21,10 @@ fn kinds_parse_from_common_words() {
     assert!(Kind::parse("transfer").is_err());
     assert_eq!(Kind::Expense.as_str(), "expense");
 }
+#[test]
+fn signed_amount_follows_kind() {
+    let expense = new_txn("5", Kind::Expense).into_transaction(1);
+    let income = new_txn("5", Kind::Income).into_transaction(2);
+    assert_eq!(expense.signed().unwrap().minor(), -500);
+    assert_eq!(income.signed().unwrap().minor(), 500);
+}
