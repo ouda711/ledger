@@ -28,3 +28,12 @@ fn signed_amount_follows_kind() {
     assert_eq!(expense.signed().unwrap().minor(), -500);
     assert_eq!(income.signed().unwrap().minor(), 500);
 }
+#[test]
+fn tags_are_normalised_sorted_and_unique() {
+    assert_eq!(parse_tags("#Trip, work,trip,, "), vec!["trip", "work"]);
+    assert!(parse_tags("").is_empty());
+    let mut t = new_txn("1", Kind::Expense).into_transaction(1);
+    t.tags = parse_tags("trip");
+    assert!(t.has_tag("#TRIP"));
+    assert!(!t.has_tag("work"));
+}
