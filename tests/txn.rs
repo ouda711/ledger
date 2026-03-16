@@ -37,3 +37,12 @@ fn tags_are_normalised_sorted_and_unique() {
     assert!(t.has_tag("#TRIP"));
     assert!(!t.has_tag("work"));
 }
+#[test]
+fn zero_negative_and_multiline_are_invalid() {
+    assert!(new_txn("1", Kind::Expense).validate().is_ok());
+    assert!(new_txn("0", Kind::Expense).validate().is_err());
+    assert!(new_txn("-1", Kind::Expense).validate().is_err());
+    let mut multiline = new_txn("1", Kind::Expense);
+    multiline.note = "two\nlines".into();
+    assert!(multiline.validate().is_err());
+}
