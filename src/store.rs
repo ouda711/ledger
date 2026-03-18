@@ -34,3 +34,18 @@ impl Default for Ledger {
         Ledger::new()
     }
 }
+impl Ledger {
+    /// Record a transaction and return its new id. Ids are never reused.
+    pub fn add(&mut self, new: NewTransaction) -> Result<u64> {
+        new.validate()?;
+        let id = self.next_id;
+        self.next_id += 1;
+        self.transactions.push(new.into_transaction(id));
+        self.sort();
+        Ok(id)
+    }
+
+    fn sort(&mut self) {
+        self.transactions.sort_by_key(|t| (t.date, t.id));
+    }
+}
