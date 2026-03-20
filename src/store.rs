@@ -49,3 +49,17 @@ impl Ledger {
         self.transactions.sort_by_key(|t| (t.date, t.id));
     }
 }
+impl Ledger {
+    pub fn get(&self, id: u64) -> Option<&Transaction> {
+        self.transactions.iter().find(|t| t.id == id)
+    }
+
+    pub fn remove(&mut self, id: u64) -> Result<Transaction> {
+        let index = self
+            .transactions
+            .iter()
+            .position(|t| t.id == id)
+            .ok_or_else(|| Error::NotFound(format!("transaction #{id}")))?;
+        Ok(self.transactions.remove(index))
+    }
+}
