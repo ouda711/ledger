@@ -36,3 +36,11 @@ fn transactions_are_sorted_by_date_then_id() {
         .collect();
     assert_eq!(notes, ["a", "c", "d"]);
 }
+#[test]
+fn remove_returns_the_transaction() {
+    let mut ledger = Ledger::new();
+    let id = ledger.add(item("2024-01-01", "1", "a")).unwrap();
+    assert_eq!(ledger.remove(id).unwrap().note, "a");
+    assert!(ledger.remove(id).is_err());
+    assert!(ledger.get(id).is_none());
+}
