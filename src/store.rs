@@ -63,3 +63,24 @@ impl Ledger {
         Ok(self.transactions.remove(index))
     }
 }
+impl Ledger {
+    /// Apply `change` to a copy of the transaction and keep it only if still valid.
+    pub fn update<F>(&mut self, id: u64, change: F) -> Result<()>
+    where
+        F: FnOnce(&mut Transaction),
+    {
+        let slot = self
+            .transactions
+            .iter_mut()
+            .find(|t| t.id == id)
+            .ok_or_else(|| Error::NotFound(format!("transaction #{id}")))?;
+        let mut edited = slot.clone();
+        change(&mut edited);
+        edited.id = id;
+        crate::txn::validate_amount(&edited.amount)?;
+        crate::txn::validate_note(&edited.note)?;
+        *slot = edited;
+        self.sort();
+        Ok(())
+    }
+}
