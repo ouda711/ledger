@@ -44,3 +44,10 @@ fn remove_returns_the_transaction() {
     assert!(ledger.remove(id).is_err());
     assert!(ledger.get(id).is_none());
 }
+#[test]
+fn ids_are_not_reused_after_removal() {
+    let mut ledger = Ledger::new();
+    let first = ledger.add(item("2024-01-01", "1", "a")).unwrap();
+    ledger.remove(first).unwrap();
+    assert_eq!(ledger.add(item("2024-01-01", "1", "b")).unwrap(), first + 1);
+}
