@@ -51,3 +51,14 @@ fn ids_are_not_reused_after_removal() {
     ledger.remove(first).unwrap();
     assert_eq!(ledger.add(item("2024-01-01", "1", "b")).unwrap(), first + 1);
 }
+#[test]
+fn update_rejects_invalid_edits() {
+    let mut ledger = Ledger::new();
+    let id = ledger.add(item("2024-01-01", "5", "a")).unwrap();
+    ledger.update(id, |t| t.note = "changed".into()).unwrap();
+    assert_eq!(ledger.get(id).unwrap().note, "changed");
+    let zero = Money::zero("KES").unwrap();
+    assert!(ledger.update(id, |t| t.amount = zero).is_err());
+    assert_eq!(ledger.get(id).unwrap().amount.minor(), 500);
+    assert!(ledger.update(99, |_| {}).is_err());
+}
