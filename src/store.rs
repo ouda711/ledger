@@ -118,3 +118,4 @@ pub(crate) fn unescape(field: &str) -> String {
     }
     out
 }
+const HEADER_PREFIX: &str = "# ledger v1";
