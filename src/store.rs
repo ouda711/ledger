@@ -132,3 +132,33 @@ fn to_line(t: &Transaction) -> String {
     ]
     .join("\t")
 }
+fn from_line(line: &str, line_no: usize) -> Result<Transaction> {
+    use crate::category::Category;
+    use crate::date::Date;
+    use crate::money::Money;
+    use crate::txn::{parse_tags, Kind};
+
+    let at = |e: Error| match e {
+        Error::Parse(msg) => Error::Parse(format!("line {line_no}: {msg}")),
+        other => other,
+    };
+    let fields: Vec<&str> = line.split('\t').collect();
+    if fields.len() != 8 {
+        return Err(at(Error::Parse(format!(
+            "expected 8 fields, found {}",
+            fields.len()
+        ))));
+    }
+    let id = fields[0]
+        .parse::<u64>()
+        .map_err(|_| at(Error::Parse(format!("bad id '{}'", fields[0]))))?;
+    Ok(Transaction {
+        id,
+        date: Date::parse(fields[1]).map_err(at)?,
+        kind: Kind::parse(fields[2]).map_err(at)?,
+        amount: Money::parse(fields[3], fields[4]).map_err(at)?,
+        category: Category::new(&unescape(fields[5])).map_err(at)?,
+        tags: parse_tags(fields[6]),
+        note: unescape(fields[7]),
+    })
+}
