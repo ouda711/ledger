@@ -119,3 +119,16 @@ pub(crate) fn unescape(field: &str) -> String {
     out
 }
 const HEADER_PREFIX: &str = "# ledger v1";
+fn to_line(t: &Transaction) -> String {
+    [
+        t.id.to_string(),
+        t.date.to_string(),
+        t.kind.as_str().to_string(),
+        t.amount.to_decimal(),
+        t.amount.currency().to_string(),
+        escape(t.category.as_str()),
+        t.tags.join(","),
+        escape(&t.note),
+    ]
+    .join("\t")
+}
