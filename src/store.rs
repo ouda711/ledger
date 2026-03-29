@@ -162,3 +162,14 @@ fn from_line(line: &str, line_no: usize) -> Result<Transaction> {
         note: unescape(fields[7]),
     })
 }
+impl Ledger {
+    /// The on-disk form: a header carrying the next id, then one line per transaction.
+    pub fn render_text(&self) -> String {
+        let mut out = format!("{HEADER_PREFIX} next={}\n", self.next_id);
+        for t in &self.transactions {
+            out.push_str(&to_line(t));
+            out.push('\n');
+        }
+        out
+    }
+}
