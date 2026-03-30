@@ -77,3 +77,11 @@ fn render_and_parse_round_trip() {
     assert_eq!(text.lines().count(), 3);
     assert_eq!(Ledger::parse_text(&text).unwrap(), ledger);
 }
+#[test]
+fn next_id_is_persisted() {
+    let mut ledger = Ledger::new();
+    let id = ledger.add(item("2024-01-01", "1", "a")).unwrap();
+    ledger.remove(id).unwrap();
+    let mut reloaded = Ledger::parse_text(&ledger.render_text()).unwrap();
+    assert_eq!(reloaded.add(item("2024-01-01", "1", "b")).unwrap(), id + 1);
+}
