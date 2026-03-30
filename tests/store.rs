@@ -62,3 +62,18 @@ fn update_rejects_invalid_edits() {
     assert_eq!(ledger.get(id).unwrap().amount.minor(), 500);
     assert!(ledger.update(99, |_| {}).is_err());
 }
+#[test]
+fn render_and_parse_round_trip() {
+    let mut ledger = Ledger::new();
+    let mut tricky = item(
+        "2024-02-29",
+        "1234.56",
+        "tab\there, slash \\ and \\n literal",
+    );
+    tricky.tags = vec!["trip".into(), "work".into()];
+    ledger.add(tricky).unwrap();
+    ledger.add(item("2024-03-01", "0.01", "")).unwrap();
+    let text = ledger.render_text();
+    assert_eq!(text.lines().count(), 3);
+    assert_eq!(Ledger::parse_text(&text).unwrap(), ledger);
+}
