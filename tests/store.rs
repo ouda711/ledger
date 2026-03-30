@@ -85,3 +85,9 @@ fn next_id_is_persisted() {
     let mut reloaded = Ledger::parse_text(&ledger.render_text()).unwrap();
     assert_eq!(reloaded.add(item("2024-01-01", "1", "b")).unwrap(), id + 1);
 }
+#[test]
+fn parse_errors_name_the_line() {
+    let text = "# ledger v1 next=3\n1\t2024-01-01\texpense\t1.00\tKES\tfood\t\t\n2\tnot-a-date\texpense\t1.00\tKES\tfood\t\t\n";
+    let err = Ledger::parse_text(text).unwrap_err().to_string();
+    assert!(err.starts_with("line 3:"), "{err}");
+}
