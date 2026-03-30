@@ -173,3 +173,38 @@ impl Ledger {
         out
     }
 }
+impl Ledger {
+    pub fn parse_text(text: &str) -> Result<Ledger> {
+        let mut ledger = Ledger::new();
+        let mut declared_next = 1;
+        for (index, line) in text.lines().enumerate() {
+            let line_no = index + 1;
+            if line.trim().is_empty() {
+                continue;
+            }
+            if let Some(rest) = line.strip_prefix(HEADER_PREFIX) {
+                if let Some(n) = rest.trim().strip_prefix("next=") {
+                    declared_next = n
+                        .parse()
+                        .map_err(|_| Error::Parse(format!("line {line_no}: bad next id '{n}'")))?;
+                }
+                continue;
+            }
+            if line.starts_with('#') {
+                continue;
+            }
+            let t = from_line(line, line_no)?;
+            if ledger.get(t.id).is_some() {
+                return Err(Error::Parse(format!(
+                    "line {line_no}: duplicate transaction id {}",
+                    t.id
+                )));
+            }
+            ledger.transactions.push(t);
+        }
+        let max_id = ledger.transactions.iter().map(|t| t.id).max().unwrap_or(0);
+        ledger.next_id = declared_next.max(max_id + 1);
+        ledger.sort();
+        Ok(ledger)
+    }
+}
