@@ -91,3 +91,9 @@ fn parse_errors_name_the_line() {
     let err = Ledger::parse_text(text).unwrap_err().to_string();
     assert!(err.starts_with("line 3:"), "{err}");
 }
+#[test]
+fn duplicate_ids_are_rejected() {
+    let line = "1\t2024-01-01\texpense\t1.00\tKES\tfood\t\t";
+    let text = format!("{line}\n{line}\n");
+    assert!(Ledger::parse_text(&text).is_err());
+}
