@@ -220,3 +220,15 @@ pub(crate) fn read_optional(path: &Path) -> Result<Option<String>> {
         Err(e) => Err(e.into()),
     }
 }
+/// Write via a temporary file and rename, so a crash never leaves half a ledger.
+pub(crate) fn write_atomic(path: &Path, contents: &str) -> Result<()> {
+    if let Some(dir) = path.parent() {
+        if !dir.as_os_str().is_empty() {
+            fs::create_dir_all(dir)?;
+        }
+    }
+    let tmp = path.with_extension("tmp");
+    fs::write(&tmp, contents)?;
+    fs::rename(&tmp, path)?;
+    Ok(())
+}
