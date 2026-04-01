@@ -208,3 +208,15 @@ impl Ledger {
         Ok(ledger)
     }
 }
+use std::fs;
+use std::io;
+use std::path::Path;
+
+/// The file's contents, or `None` if it does not exist yet.
+pub(crate) fn read_optional(path: &Path) -> Result<Option<String>> {
+    match fs::read_to_string(path) {
+        Ok(text) => Ok(Some(text)),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(e.into()),
+    }
+}
