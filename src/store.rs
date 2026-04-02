@@ -232,3 +232,16 @@ pub(crate) fn write_atomic(path: &Path, contents: &str) -> Result<()> {
     fs::rename(&tmp, path)?;
     Ok(())
 }
+impl Ledger {
+    /// Load from `path`; a missing file is an empty ledger.
+    pub fn load(path: &Path) -> Result<Ledger> {
+        match read_optional(path)? {
+            Some(text) => Ledger::parse_text(&text),
+            None => Ok(Ledger::new()),
+        }
+    }
+
+    pub fn save(&self, path: &Path) -> Result<()> {
+        write_atomic(path, &self.render_text())
+    }
+}
