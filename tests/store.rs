@@ -97,3 +97,15 @@ fn duplicate_ids_are_rejected() {
     let text = format!("{line}\n{line}\n");
     assert!(Ledger::parse_text(&text).is_err());
 }
+#[test]
+fn save_and_load_from_disk() {
+    let dir = std::env::temp_dir().join(format!("ledger-store-test-{}", std::process::id()));
+    let path = dir.join("nested").join("ledger.tsv");
+    assert!(Ledger::load(&path).unwrap().is_empty());
+    let mut ledger = Ledger::new();
+    ledger.add(item("2024-01-01", "9.99", "saved")).unwrap();
+    ledger.save(&path).unwrap();
+    assert_eq!(Ledger::load(&path).unwrap(), ledger);
+    assert!(!path.with_extension("tmp").exists());
+    std::fs::remove_dir_all(dir).unwrap();
+}
