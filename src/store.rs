@@ -245,3 +245,15 @@ impl Ledger {
         write_atomic(path, &self.render_text())
     }
 }
+impl Ledger {
+    /// Validate every transaction first, then add them all; nothing is added if one is bad.
+    pub fn add_all(&mut self, items: Vec<NewTransaction>) -> Result<Vec<u64>> {
+        for (index, item) in items.iter().enumerate() {
+            item.validate().map_err(|e| match e {
+                Error::Parse(msg) => Error::Parse(format!("item {}: {msg}", index + 1)),
+                other => other,
+            })?;
+        }
+        items.into_iter().map(|item| self.add(item)).collect()
+    }
+}
