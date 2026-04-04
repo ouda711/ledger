@@ -109,3 +109,17 @@ fn save_and_load_from_disk() {
     assert!(!path.with_extension("tmp").exists());
     std::fs::remove_dir_all(dir).unwrap();
 }
+#[test]
+fn add_all_adds_nothing_when_one_item_is_bad() {
+    let mut ledger = Ledger::new();
+    let bad = item("2024-01-02", "0", "zero");
+    let err = ledger
+        .add_all(vec![item("2024-01-01", "1", "ok"), bad])
+        .unwrap_err();
+    assert!(err.to_string().contains("item 2"));
+    assert!(ledger.is_empty());
+    assert_eq!(
+        ledger.add_all(vec![item("2024-01-01", "1", "ok")]).unwrap(),
+        vec![1]
+    );
+}
