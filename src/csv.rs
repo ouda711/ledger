@@ -51,3 +51,20 @@ pub fn parse(text: &str) -> Result<Vec<Vec<String>>> {
     }
     Ok(records)
 }
+/// Quote a field if it contains a comma, quote or line break.
+pub fn quote(field: &str) -> String {
+    if field.contains([',', '"', '\n', '\r']) {
+        format!("\"{}\"", field.replace('"', "\"\""))
+    } else {
+        field.to_string()
+    }
+}
+
+/// One CSV line, without the trailing newline.
+pub fn write_record<S: AsRef<str>>(fields: &[S]) -> String {
+    fields
+        .iter()
+        .map(|f| quote(f.as_ref()))
+        .collect::<Vec<_>>()
+        .join(",")
+}
