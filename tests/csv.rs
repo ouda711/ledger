@@ -11,3 +11,8 @@ fn handles_quotes_commas_and_newlines() {
     assert_eq!(records[0], vec!["a,b", "say \"hi\"", "two\nlines"]);
     assert_eq!(records[1], vec!["x", "", "z"]);
 }
+#[test]
+fn unclosed_quote_is_an_error_and_blank_lines_skip() {
+    assert!(csv::parse("\"open,1\n").is_err());
+    assert_eq!(csv::parse("a\n\n\nb\n").unwrap().len(), 2);
+}
