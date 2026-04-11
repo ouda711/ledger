@@ -16,3 +16,10 @@ fn unclosed_quote_is_an_error_and_blank_lines_skip() {
     assert!(csv::parse("\"open,1\n").is_err());
     assert_eq!(csv::parse("a\n\n\nb\n").unwrap().len(), 2);
 }
+#[test]
+fn quotes_only_when_needed() {
+    assert_eq!(csv::quote("plain"), "plain");
+    assert_eq!(csv::quote("a,b"), "\"a,b\"");
+    assert_eq!(csv::quote("say \"hi\""), "\"say \"\"hi\"\"\"");
+    assert_eq!(csv::write_record(&["a", "b,c"]), "a,\"b,c\"");
+}
