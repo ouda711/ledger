@@ -68,3 +68,31 @@ pub fn write_record<S: AsRef<str>>(fields: &[S]) -> String {
         .collect::<Vec<_>>()
         .join(",")
 }
+use crate::txn::Transaction;
+
+/// Columns written by [`export`] and understood by [`import`].
+pub const COLUMNS: [&str; 7] = [
+    "date", "kind", "amount", "currency", "category", "tags", "note",
+];
+
+pub fn export<'a, I>(transactions: I) -> String
+where
+    I: IntoIterator<Item = &'a Transaction>,
+{
+    let mut out = write_record(&COLUMNS);
+    out.push('\n');
+    for t in transactions {
+        let row = [
+            t.date.to_string(),
+            t.kind.as_str().to_string(),
+            t.amount.to_decimal(),
+            t.amount.currency().to_string(),
+            t.category.to_string(),
+            t.tags.join(","),
+            t.note.clone(),
+        ];
+        out.push_str(&write_record(&row));
+        out.push('\n');
+    }
+    out
+}
