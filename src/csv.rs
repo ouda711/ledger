@@ -102,3 +102,65 @@ fn column(header: &[String], names: &[&str]) -> Option<usize> {
         names.iter().any(|n| *n == h)
     })
 }
+use crate::category::Category;
+use crate::date::Date;
+use crate::money::Money;
+use crate::txn::{parse_tags, Kind, NewTransaction};
+
+/// Read transactions from CSV with a header row.
+///
+/// `date` and `amount` columns are required. Without a `kind` column a negative amount
+/// is an expense. Without a `currency` column, `default_currency` is used; if that is
+/// missing too the import is refused rather than guessed.
+pub fn import(text: &str, default_currency: Option<&str>) -> Result<Vec<NewTransaction>> {
+    let mut records = parse(text)?.into_iter();
+    let header = records
+        .next()
+        .ok_or_else(|| parse_error("the CSV file is empty"))?;
+    let date_col = column(&header, &["date"]).ok_or_else(|| parse_error("no 'date' column"))?;
+    let amount_col =
+        column(&header, &["amount", "value"]).ok_or_else(|| parse_error("no 'amount' column"))?;
+    let kind_col = column(&header, &["kind", "type"]);
+    let currency_col = column(&header, &["currency"]);
+    let category_col = column(&header, &["category"]);
+    let tags_col = column(&header, &["tags"]);
+    let note_col = column(&header, &["note", "description", "memo"]);
+
+    let mut out = Vec::new();
+    for (index, record) in records.enumerate() {
+        let row = index + 2;
+        let cell = |col: Option<usize>| col.and_then(|c| record.get(c)).map(|s| s.trim());
+        let fail = |msg: String| parse_error(format!("row {row}: {msg}"));
+        let currency = match cell(currency_col).filter(|s| !s.is_empty()) {
+            Some(c) => c.to_string(),
+            None => default_currency
+                .ok_or_else(|| {
+                    fail("no currency; add a currency column or pass --currency".into())
+                })?
+                .to_string(),
+        };
+        let raw_amount = cell(Some(amount_col)).unwrap_or("");
+        let amount = Money::parse(raw_amount, &currency).map_err(|e| fail(e.to_string()))?;
+        let kind = match cell(kind_col).filter(|s| !s.is_empty()) {
+            Some(k) => Kind::parse(k).map_err(|e| fail(e.to_string()))?,
+            None if amount.is_negative() => Kind::Expense,
+            None => Kind::Income,
+        };
+        let category = match cell(category_col).filter(|s| !s.is_empty()) {
+            Some(c) => Category::new(c).map_err(|e| fail(e.to_string()))?,
+            None => Category::uncategorised(),
+        };
+        let item = NewTransaction {
+            date: Date::parse(cell(Some(date_col)).unwrap_or(""))
+                .map_err(|e| fail(e.to_string()))?,
+            kind,
+            amount: amount.abs()?,
+            category,
+            note: cell(note_col).unwrap_or("").replace(['\n', '\r'], " "),
+            tags: parse_tags(cell(tags_col).unwrap_or("")),
+        };
+        item.validate().map_err(|e| fail(e.to_string()))?;
+        out.push(item);
+    }
+    Ok(out)
+}
