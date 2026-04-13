@@ -96,3 +96,9 @@ where
     }
     out
 }
+fn column(header: &[String], names: &[&str]) -> Option<usize> {
+    header.iter().position(|h| {
+        let h = h.trim().to_ascii_lowercase();
+        names.iter().any(|n| *n == h)
+    })
+}
