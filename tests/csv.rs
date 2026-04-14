@@ -37,3 +37,11 @@ fn imports_all_columns() {
     assert_eq!(t.tags, vec!["team", "work"]);
     assert_eq!(t.note, "Sandwich");
 }
+#[test]
+fn sign_decides_kind_without_kind_column() {
+    let items = csv::import("date,amount\n2024-03-01,-5\n2024-03-02,100\n", Some("KES")).unwrap();
+    assert_eq!(items[0].kind, Kind::Expense);
+    assert_eq!(items[0].amount.minor(), 500);
+    assert_eq!(items[1].kind, Kind::Income);
+    assert_eq!(items[0].category.as_str(), "uncategorised");
+}
