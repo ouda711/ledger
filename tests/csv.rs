@@ -23,3 +23,17 @@ fn quotes_only_when_needed() {
     assert_eq!(csv::quote("say \"hi\""), "\"say \"\"hi\"\"\"");
     assert_eq!(csv::write_record(&["a", "b,c"]), "a,\"b,c\"");
 }
+use ledger::txn::Kind;
+
+#[test]
+fn imports_all_columns() {
+    let text = "Date,Kind,Amount,Currency,Category,Tags,Note\n2024-03-01,expense,12.50,usd,Food/Lunch,\"work,team\",Sandwich\n";
+    let items = csv::import(text, None).unwrap();
+    assert_eq!(items.len(), 1);
+    let t = &items[0];
+    assert_eq!(t.kind, Kind::Expense);
+    assert_eq!(t.amount.to_string(), "USD 12.50");
+    assert_eq!(t.category.as_str(), "food/lunch");
+    assert_eq!(t.tags, vec!["team", "work"]);
+    assert_eq!(t.note, "Sandwich");
+}
