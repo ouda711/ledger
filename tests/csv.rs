@@ -45,3 +45,8 @@ fn sign_decides_kind_without_kind_column() {
     assert_eq!(items[1].kind, Kind::Income);
     assert_eq!(items[0].category.as_str(), "uncategorised");
 }
+#[test]
+fn missing_currency_is_refused_not_guessed() {
+    let err = csv::import("date,amount\n2024-03-01,5\n", None).unwrap_err();
+    assert!(err.to_string().contains("row 2"), "{err}");
+}
