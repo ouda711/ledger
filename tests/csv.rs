@@ -50,3 +50,11 @@ fn missing_currency_is_refused_not_guessed() {
     let err = csv::import("date,amount\n2024-03-01,5\n", None).unwrap_err();
     assert!(err.to_string().contains("row 2"), "{err}");
 }
+#[test]
+fn import_errors_name_the_row() {
+    let text = "date,amount,currency\n2024-03-01,5,KES\n2024-03-02,5.555,KES\n";
+    let err = csv::import(text, None).unwrap_err().to_string();
+    assert!(err.starts_with("row 3:"), "{err}");
+    assert!(csv::import("amount\n5\n", Some("KES")).is_err());
+    assert!(csv::import("", Some("KES")).is_err());
+}
