@@ -58,3 +58,16 @@ fn import_errors_name_the_row() {
     assert!(csv::import("amount\n5\n", Some("KES")).is_err());
     assert!(csv::import("", Some("KES")).is_err());
 }
+#[test]
+fn export_then_import_round_trips() {
+    use ledger::store::Ledger;
+    let items = csv::import(
+        "date,amount,currency,category,note,tags\n2024-01-05,-3.20,EUR,coffee,\"flat white, large\",daily\n2024-01-06,1500,EUR,salary,,\n",
+        None,
+    )
+    .unwrap();
+    let mut ledger = Ledger::new();
+    ledger.add_all(items.clone()).unwrap();
+    let exported = csv::export(ledger.transactions());
+    assert_eq!(csv::import(&exported, None).unwrap(), items);
+}
