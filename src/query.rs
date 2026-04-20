@@ -52,3 +52,18 @@ impl Filter {
 pub fn select<'a>(transactions: &'a [Transaction], filter: &Filter) -> Vec<&'a Transaction> {
     transactions.iter().filter(|t| filter.matches(t)).collect()
 }
+impl Filter {
+    /// Everything dated within `month`.
+    pub fn for_month(month: Month) -> Filter {
+        Filter {
+            from: Some(month.first_day()),
+            to: Some(month.last_day()),
+            ..Filter::default()
+        }
+    }
+
+    /// True when no criteria are set.
+    pub fn is_empty(&self) -> bool {
+        *self == Filter::default()
+    }
+}
