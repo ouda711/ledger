@@ -48,3 +48,7 @@ impl Filter {
         true
     }
 }
+/// The transactions matching `filter`, in ledger order.
+pub fn select<'a>(transactions: &'a [Transaction], filter: &Filter) -> Vec<&'a Transaction> {
+    transactions.iter().filter(|t| filter.matches(t)).collect()
+}
