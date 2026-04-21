@@ -109,3 +109,16 @@ fn empty_filter_selects_everything() {
     assert!(Filter::default().is_empty());
     assert_eq!(select(l.transactions(), &Filter::default()).len(), 7);
 }
+#[test]
+fn filters_by_month_and_range() {
+    use ledger::date::Month;
+    let l = fixture();
+    let feb = Filter::for_month(Month::parse("2024-02").unwrap());
+    assert_eq!(select(l.transactions(), &feb).len(), 3);
+    let range = Filter {
+        from: Some(Date::parse("2024-01-10").unwrap()),
+        to: Some(Date::parse("2024-02-01").unwrap()),
+        ..Filter::default()
+    };
+    assert_eq!(select(l.transactions(), &range).len(), 3);
+}
