@@ -33,3 +33,18 @@ impl Totals {
         Ok(())
     }
 }
+/// One [`Totals`] per currency, alphabetically.
+pub fn totals(transactions: &[&Transaction]) -> Result<Vec<Totals>> {
+    let mut by_currency: BTreeMap<String, Totals> = BTreeMap::new();
+    for t in transactions {
+        let currency = t.amount.currency();
+        if !by_currency.contains_key(currency) {
+            by_currency.insert(currency.to_string(), Totals::empty(currency)?);
+        }
+        by_currency
+            .get_mut(currency)
+            .expect("inserted above")
+            .record(t)?;
+    }
+    Ok(by_currency.into_values().collect())
+}
