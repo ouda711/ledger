@@ -122,3 +122,50 @@ fn filters_by_month_and_range() {
     };
     assert_eq!(select(l.transactions(), &range).len(), 3);
 }
+#[test]
+fn filters_by_attributes() {
+    let l = fixture();
+    let count = |f: Filter| select(l.transactions(), &f).len();
+    assert_eq!(
+        count(Filter {
+            category: Some(Category::new("food").unwrap()),
+            ..Default::default()
+        }),
+        3
+    );
+    assert_eq!(
+        count(Filter {
+            kind: Some(Kind::Income),
+            ..Default::default()
+        }),
+        2
+    );
+    assert_eq!(
+        count(Filter {
+            tag: Some("#Friends".into()),
+            ..Default::default()
+        }),
+        1
+    );
+    assert_eq!(
+        count(Filter {
+            text: Some("PAY".into()),
+            ..Default::default()
+        }),
+        2
+    );
+    assert_eq!(
+        count(Filter {
+            text: Some("groc".into()),
+            ..Default::default()
+        }),
+        2
+    );
+    assert_eq!(
+        count(Filter {
+            currency: Some("kes".into()),
+            ..Default::default()
+        }),
+        1
+    );
+}
