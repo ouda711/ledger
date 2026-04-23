@@ -11,3 +11,4 @@ pub mod txn;
 pub mod store;
 pub mod csv;
 pub mod query;
+pub mod report;
