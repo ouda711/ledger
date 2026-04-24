@@ -169,3 +169,18 @@ fn filters_by_attributes() {
         1
     );
 }
+use ledger::report;
+
+#[test]
+fn totals_never_blend_currencies() {
+    let l = fixture();
+    let rows: Vec<_> = l.transactions().iter().collect();
+    let totals = report::totals(&rows).unwrap();
+    assert_eq!(totals.len(), 2);
+    assert_eq!(totals[0].currency, "KES");
+    assert_eq!(totals[0].expense.to_decimal(), "15000.00");
+    assert_eq!(totals[1].currency, "USD");
+    assert_eq!(totals[1].income.to_decimal(), "6000.00");
+    assert_eq!(totals[1].expense.to_decimal(), "1135.50");
+    assert_eq!(totals[1].net().unwrap().to_decimal(), "4864.50");
+}
