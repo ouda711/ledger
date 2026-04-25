@@ -54,3 +54,10 @@ impl Category {
         self.0.split('/').count()
     }
 }
+impl Category {
+    /// Keep at most `depth` segments: `food/groceries/fruit` at depth 2 is `food/groceries`.
+    pub fn truncate(&self, depth: usize) -> Category {
+        let kept: Vec<&str> = self.0.split('/').take(depth.max(1)).collect();
+        Category(kept.join("/"))
+    }
+}
