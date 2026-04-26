@@ -48,3 +48,52 @@ pub fn totals(transactions: &[&Transaction]) -> Result<Vec<Totals>> {
     }
     Ok(by_currency.into_values().collect())
 }
+use crate::category::Category;
+use std::collections::btree_map::Entry;
+
+/// One line of a category breakdown.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CategoryTotal {
+    pub category: Category,
+    pub total: Money,
+    pub count: usize,
+}
+
+/// Totals of `kind` per category, optionally rolled up to `depth` levels.
+/// Sorted by currency, then largest first.
+pub fn by_category(
+    transactions: &[&Transaction],
+    kind: Kind,
+    depth: Option<usize>,
+) -> Result<Vec<CategoryTotal>> {
+    let mut groups: BTreeMap<(String, Category), (Money, usize)> = BTreeMap::new();
+    for t in transactions.iter().filter(|t| t.kind == kind) {
+        let category = match depth {
+            Some(d) => t.category.truncate(d),
+            None => t.category.clone(),
+        };
+        let key = (t.amount.currency().to_string(), category);
+        let entry = match groups.entry(key) {
+            Entry::Occupied(o) => o.into_mut(),
+            Entry::Vacant(v) => v.insert((Money::zero(t.amount.currency())?, 0)),
+        };
+        entry.0 = entry.0.checked_add(&t.amount)?;
+        entry.1 += 1;
+    }
+    let mut rows: Vec<CategoryTotal> = groups
+        .into_iter()
+        .map(|((_, category), (total, count))| CategoryTotal {
+            category,
+            total,
+            count,
+        })
+        .collect();
+    rows.sort_by(|a, b| {
+        a.total
+            .currency()
+            .cmp(b.total.currency())
+            .then(b.total.minor().cmp(&a.total.minor()))
+            .then(a.category.cmp(&b.category))
+    });
+    Ok(rows)
+}
