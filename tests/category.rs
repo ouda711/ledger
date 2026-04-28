@@ -30,3 +30,11 @@ fn is_within_respects_segment_boundaries() {
     assert!(!c("foodstuff").is_within(&c("food")));
     assert!(!c("food").is_within(&c("food/groceries")));
 }
+#[test]
+fn truncate_to_depth() {
+    let fruit = c("food/groceries/fruit");
+    assert_eq!(fruit.truncate(1), c("food"));
+    assert_eq!(fruit.truncate(2), c("food/groceries"));
+    assert_eq!(fruit.truncate(9), fruit);
+    assert_eq!(fruit.truncate(0), c("food"));
+}
