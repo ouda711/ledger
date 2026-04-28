@@ -184,3 +184,16 @@ fn totals_never_blend_currencies() {
     assert_eq!(totals[1].expense.to_decimal(), "1135.50");
     assert_eq!(totals[1].net().unwrap().to_decimal(), "4864.50");
 }
+#[test]
+fn category_breakdown_sorted_largest_first() {
+    let l = fixture();
+    let rows: Vec<_> = l.transactions().iter().collect();
+    let groups = report::by_category(&rows, Kind::Expense, None).unwrap();
+    let names: Vec<String> = groups.iter().map(|g| g.category.to_string()).collect();
+    assert_eq!(
+        names,
+        ["transport", "rent", "food/groceries", "food/eating-out"]
+    );
+    assert_eq!(groups[2].count, 2);
+    assert_eq!(groups[2].total.to_decimal(), "200.50");
+}
