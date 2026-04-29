@@ -197,3 +197,15 @@ fn category_breakdown_sorted_largest_first() {
     assert_eq!(groups[2].count, 2);
     assert_eq!(groups[2].total.to_decimal(), "200.50");
 }
+#[test]
+fn category_breakdown_rolls_up_by_depth() {
+    let l = fixture();
+    let rows: Vec<_> = l.transactions().iter().collect();
+    let groups = report::by_category(&rows, Kind::Expense, Some(1)).unwrap();
+    let food = groups
+        .iter()
+        .find(|g| g.category.as_str() == "food")
+        .unwrap();
+    assert_eq!(food.total.to_decimal(), "235.50");
+    assert_eq!(food.count, 3);
+}
