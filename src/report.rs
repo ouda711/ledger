@@ -97,3 +97,27 @@ pub fn by_category(
     });
     Ok(rows)
 }
+use crate::date::Month;
+
+/// Income and expense for one month in one currency.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MonthRow {
+    pub month: Month,
+    pub totals: Totals,
+}
+
+/// One row per (month, currency), oldest first.
+pub fn monthly(transactions: &[&Transaction]) -> Result<Vec<MonthRow>> {
+    let mut groups: BTreeMap<(Month, String), Totals> = BTreeMap::new();
+    for t in transactions {
+        let key = (Month::of(&t.date), t.amount.currency().to_string());
+        if !groups.contains_key(&key) {
+            groups.insert(key.clone(), Totals::empty(&key.1)?);
+        }
+        groups.get_mut(&key).expect("inserted above").record(t)?;
+    }
+    Ok(groups
+        .into_iter()
+        .map(|((month, _), totals)| MonthRow { month, totals })
+        .collect())
+}
