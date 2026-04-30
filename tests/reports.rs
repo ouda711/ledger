@@ -209,3 +209,15 @@ fn category_breakdown_rolls_up_by_depth() {
     assert_eq!(food.total.to_decimal(), "235.50");
     assert_eq!(food.count, 3);
 }
+#[test]
+fn monthly_rows_per_month_and_currency() {
+    let l = fixture();
+    let rows: Vec<_> = l.transactions().iter().collect();
+    let months = report::monthly(&rows).unwrap();
+    let keys: Vec<String> = months
+        .iter()
+        .map(|m| format!("{} {}", m.month, m.totals.currency))
+        .collect();
+    assert_eq!(keys, ["2024-01 USD", "2024-02 KES", "2024-02 USD"]);
+    assert_eq!(months[0].totals.net().unwrap().to_decimal(), "1944.60");
+}
