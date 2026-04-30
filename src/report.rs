@@ -121,3 +121,19 @@ pub fn monthly(transactions: &[&Transaction]) -> Result<Vec<MonthRow>> {
         .map(|((month, _), totals)| MonthRow { month, totals })
         .collect())
 }
+/// The balance after each transaction, tracked separately for each currency.
+pub fn running_balance(transactions: &[&Transaction]) -> Result<Vec<(u64, Money)>> {
+    let mut balances: BTreeMap<String, Money> = BTreeMap::new();
+    let mut out = Vec::with_capacity(transactions.len());
+    for t in transactions {
+        let currency = t.amount.currency().to_string();
+        let current = match balances.get(&currency) {
+            Some(m) => *m,
+            None => Money::zero(&currency)?,
+        };
+        let next = current.checked_add(&t.signed()?)?;
+        balances.insert(currency, next);
+        out.push((t.id, next));
+    }
+    Ok(out)
+}
