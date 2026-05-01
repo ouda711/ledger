@@ -221,3 +221,13 @@ fn monthly_rows_per_month_and_currency() {
     assert_eq!(keys, ["2024-01 USD", "2024-02 KES", "2024-02 USD"]);
     assert_eq!(months[0].totals.net().unwrap().to_decimal(), "1944.60");
 }
+#[test]
+fn running_balance_tracks_each_currency() {
+    let l = fixture();
+    let rows: Vec<_> = l.transactions().iter().collect();
+    let balances = report::running_balance(&rows).unwrap();
+    assert_eq!(balances[0].1.to_decimal(), "3000.00");
+    assert_eq!(balances[1].1.to_decimal(), "2879.60");
+    let last = balances.last().unwrap().1;
+    assert_eq!(last.to_string(), "KES -15,000.00");
+}
