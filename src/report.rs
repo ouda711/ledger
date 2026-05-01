@@ -137,3 +137,23 @@ pub fn running_balance(transactions: &[&Transaction]) -> Result<Vec<(u64, Money)
     }
     Ok(out)
 }
+/// Average expense per month over the months that have any activity, one per currency.
+/// Rounded half up to the minor unit.
+pub fn average_monthly_expense(transactions: &[&Transaction]) -> Result<Vec<Money>> {
+    let mut sums: BTreeMap<String, (Money, i64)> = BTreeMap::new();
+    for row in monthly(transactions)? {
+        let entry = match sums.entry(row.totals.currency.clone()) {
+            Entry::Occupied(o) => o.into_mut(),
+            Entry::Vacant(v) => v.insert((Money::zero(&row.totals.currency)?, 0)),
+        };
+        entry.0 = entry.0.checked_add(&row.totals.expense)?;
+        entry.1 += 1;
+    }
+    sums.into_values()
+        .map(|(total, months)| {
+            let (q, r) = (total.minor() / months, total.minor() % months);
+            let rounded = if r * 2 >= months { q + 1 } else { q };
+            Money::from_minor(rounded, total.currency())
+        })
+        .collect()
+}
