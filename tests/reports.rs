@@ -231,3 +231,12 @@ fn running_balance_tracks_each_currency() {
     let last = balances.last().unwrap().1;
     assert_eq!(last.to_string(), "KES -15,000.00");
 }
+#[test]
+fn average_monthly_expense_rounds_half_up() {
+    let l = fixture();
+    let rows: Vec<_> = l.transactions().iter().collect();
+    let averages = report::average_monthly_expense(&rows).unwrap();
+    assert_eq!(averages[0].to_decimal(), "15000.00");
+    // (1055.40 + 80.10) / 2 = 567.75
+    assert_eq!(averages[1].to_decimal(), "567.75");
+}
