@@ -12,3 +12,14 @@ pub struct Table {
     aligns: Vec<Align>,
     rows: Vec<Vec<String>>,
 }
+fn width(text: &str) -> usize {
+    text.chars().count()
+}
+
+fn pad(text: &str, to: usize, align: Align) -> String {
+    let fill = " ".repeat(to.saturating_sub(width(text)));
+    match align {
+        Align::Left => format!("{text}{fill}"),
+        Align::Right => format!("{fill}{text}"),
+    }
+}
