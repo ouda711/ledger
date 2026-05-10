@@ -23,3 +23,22 @@ fn pad(text: &str, to: usize, align: Align) -> String {
         Align::Right => format!("{fill}{text}"),
     }
 }
+impl Table {
+    pub fn new(columns: &[(&str, Align)]) -> Table {
+        Table {
+            headers: columns.iter().map(|(h, _)| h.to_string()).collect(),
+            aligns: columns.iter().map(|(_, a)| *a).collect(),
+            rows: Vec::new(),
+        }
+    }
+
+    /// Add a row; missing cells are blank and extra cells are dropped.
+    pub fn push(&mut self, mut row: Vec<String>) {
+        row.resize(self.headers.len(), String::new());
+        self.rows.push(row);
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.rows.is_empty()
+    }
+}
