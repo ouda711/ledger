@@ -12,3 +12,4 @@ pub mod store;
 pub mod csv;
 pub mod query;
 pub mod report;
+pub mod table;
