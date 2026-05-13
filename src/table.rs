@@ -81,3 +81,14 @@ impl Table {
         out
     }
 }
+/// Shorten `text` to at most `max` characters, ending in `…` when cut.
+pub fn truncate(text: &str, max: usize) -> String {
+    if width(text) <= max {
+        return text.to_string();
+    }
+    if max == 0 {
+        return String::new();
+    }
+    let kept: String = text.chars().take(max - 1).collect();
+    format!("{kept}…")
+}
