@@ -42,3 +42,42 @@ impl Table {
         self.rows.is_empty()
     }
 }
+impl Table {
+    pub fn render(&self) -> String {
+        let widths: Vec<usize> = (0..self.headers.len())
+            .map(|i| {
+                self.rows
+                    .iter()
+                    .map(|r| width(&r[i]))
+                    .chain(std::iter::once(width(&self.headers[i])))
+                    .max()
+                    .unwrap_or(0)
+            })
+            .collect();
+        let line = |cells: &[String]| {
+            cells
+                .iter()
+                .enumerate()
+                .map(|(i, c)| pad(c, widths[i], self.aligns[i]))
+                .collect::<Vec<_>>()
+                .join("  ")
+                .trim_end()
+                .to_string()
+        };
+        let mut out = line(&self.headers);
+        out.push('\n');
+        out.push_str(
+            &widths
+                .iter()
+                .map(|w| "-".repeat(*w))
+                .collect::<Vec<_>>()
+                .join("  "),
+        );
+        out.push('\n');
+        for row in &self.rows {
+            out.push_str(&line(row));
+            out.push('\n');
+        }
+        out
+    }
+}
