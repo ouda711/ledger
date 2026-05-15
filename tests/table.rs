@@ -13,3 +13,13 @@ coffee    3.20
 ";
     assert_eq!(t.render(), expected);
 }
+#[test]
+fn pads_short_rows_and_drops_extra_cells() {
+    let mut t = Table::new(&[("A", Align::Left), ("B", Align::Left)]);
+    assert!(t.is_empty());
+    t.push(vec!["only".into()]);
+    t.push(vec!["x".into(), "y".into(), "ignored".into()]);
+    let out = t.render();
+    assert!(!out.contains("ignored"));
+    assert_eq!(out.lines().nth(2), Some("only"));
+}
