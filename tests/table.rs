@@ -23,3 +23,10 @@ fn pads_short_rows_and_drops_extra_cells() {
     assert!(!out.contains("ignored"));
     assert_eq!(out.lines().nth(2), Some("only"));
 }
+#[test]
+fn truncates_with_ellipsis() {
+    assert_eq!(truncate("short", 10), "short");
+    assert_eq!(truncate("a long note", 6), "a lon…");
+    assert_eq!(truncate("héllo wörld", 5), "héll…");
+    assert_eq!(truncate("x", 0), "");
+}
