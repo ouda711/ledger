@@ -25,3 +25,22 @@ impl BudgetStatus {
         self.remaining.is_negative()
     }
 }
+/// Expenses in `month` under the budget's category, in the budget's currency.
+pub fn status(budget: &Budget, transactions: &[Transaction], month: Month) -> Result<BudgetStatus> {
+    let mut spent = Money::zero(budget.limit.currency())?;
+    for t in transactions {
+        if t.kind == Kind::Expense
+            && month.contains(&t.date)
+            && t.category.is_within(&budget.category)
+            && t.amount.currency() == budget.limit.currency()
+        {
+            spent = spent.checked_add(&t.amount)?;
+        }
+    }
+    Ok(BudgetStatus {
+        budget: budget.clone(),
+        remaining: budget.limit.checked_sub(&spent)?,
+        used_bp: spent.ratio_bp(&budget.limit)?,
+        spent,
+    })
+}
