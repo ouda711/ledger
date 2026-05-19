@@ -58,3 +58,15 @@ fn overspending_shows_negative_remaining() {
     assert_eq!(s.remaining.to_decimal(), "-20.00");
     assert_eq!(s.used_bp, Some(12_000));
 }
+#[test]
+fn set_replaces_and_remove_deletes() {
+    let mut b = Budgets::default();
+    b.set(budget("food", "400")).unwrap();
+    b.set(budget("food", "500")).unwrap();
+    b.set(budget("rent", "900")).unwrap();
+    assert_eq!(b.iter().count(), 2);
+    assert_eq!(b.iter().next().unwrap().limit.to_decimal(), "500.00");
+    b.remove(&Category::new("food").unwrap()).unwrap();
+    assert!(b.remove(&Category::new("food").unwrap()).is_err());
+    assert!(b.set(budget("x", "-1")).is_err());
+}
