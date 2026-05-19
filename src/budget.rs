@@ -44,3 +44,45 @@ pub fn status(budget: &Budget, transactions: &[Transaction], month: Month) -> Re
         spent,
     })
 }
+/// Every budget, at most one per category and currency.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Budgets {
+    items: Vec<Budget>,
+}
+
+impl Budgets {
+    /// Add a budget, replacing any existing one for the same category and currency.
+    pub fn set(&mut self, budget: Budget) -> Result<()> {
+        if budget.limit.is_negative() {
+            return Err(parse_error("a budget limit cannot be negative"));
+        }
+        self.items.retain(|b| {
+            !(b.category == budget.category && b.limit.currency() == budget.limit.currency())
+        });
+        self.items.push(budget);
+        self.items.sort_by(|a, b| {
+            a.category
+                .cmp(&b.category)
+                .then(a.limit.currency().cmp(b.limit.currency()))
+        });
+        Ok(())
+    }
+
+    /// Remove every budget for `category`.
+    pub fn remove(&mut self, category: &Category) -> Result<()> {
+        let before = self.items.len();
+        self.items.retain(|b| b.category != *category);
+        if self.items.len() == before {
+            return Err(Error::NotFound(format!("budget for '{category}'")));
+        }
+        Ok(())
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Budget> {
+        self.items.iter()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.items.is_empty()
+    }
+}
