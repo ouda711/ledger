@@ -44,3 +44,17 @@ fn status_counts_nested_spending_in_the_month() {
     assert_eq!(s.used_bp, Some(3750));
     assert!(!s.is_over());
 }
+#[test]
+fn overspending_shows_negative_remaining() {
+    let mut l = Ledger::new();
+    spend(&mut l, "2024-03-02", "120", "USD", "fun");
+    let s = status(
+        &budget("fun", "100"),
+        l.transactions(),
+        Month::parse("2024-03").unwrap(),
+    )
+    .unwrap();
+    assert!(s.is_over());
+    assert_eq!(s.remaining.to_decimal(), "-20.00");
+    assert_eq!(s.used_bp, Some(12_000));
+}
