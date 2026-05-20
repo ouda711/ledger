@@ -86,3 +86,15 @@ impl Budgets {
         self.items.is_empty()
     }
 }
+impl Budgets {
+    pub fn statuses(
+        &self,
+        transactions: &[Transaction],
+        month: Month,
+    ) -> Result<Vec<BudgetStatus>> {
+        self.items
+            .iter()
+            .map(|b| status(b, transactions, month))
+            .collect()
+    }
+}
