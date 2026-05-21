@@ -98,3 +98,54 @@ impl Budgets {
             .collect()
     }
 }
+use crate::store::{escape, read_optional, unescape, write_atomic};
+use std::path::Path;
+
+impl Budgets {
+    /// One `category<TAB>amount<TAB>currency` line per budget.
+    pub fn render_text(&self) -> String {
+        self.items
+            .iter()
+            .map(|b| {
+                format!(
+                    "{}\t{}\t{}\n",
+                    escape(b.category.as_str()),
+                    b.limit.to_decimal(),
+                    b.limit.currency()
+                )
+            })
+            .collect()
+    }
+
+    pub fn parse_text(text: &str) -> Result<Budgets> {
+        let mut budgets = Budgets::default();
+        for (index, line) in text.lines().enumerate() {
+            if line.trim().is_empty() || line.starts_with('#') {
+                continue;
+            }
+            let fields: Vec<&str> = line.split('\t').collect();
+            if fields.len() != 3 {
+                return Err(parse_error(format!(
+                    "budgets line {}: expected 3 fields",
+                    index + 1
+                )));
+            }
+            budgets.set(Budget {
+                category: Category::new(&unescape(fields[0]))?,
+                limit: Money::parse(fields[1], fields[2])?,
+            })?;
+        }
+        Ok(budgets)
+    }
+
+    pub fn load(path: &Path) -> Result<Budgets> {
+        match read_optional(path)? {
+            Some(text) => Budgets::parse_text(&text),
+            None => Ok(Budgets::default()),
+        }
+    }
+
+    pub fn save(&self, path: &Path) -> Result<()> {
+        write_atomic(path, &self.render_text())
+    }
+}
