@@ -70,3 +70,15 @@ fn set_replaces_and_remove_deletes() {
     assert!(b.remove(&Category::new("food").unwrap()).is_err());
     assert!(b.set(budget("x", "-1")).is_err());
 }
+#[test]
+fn budgets_round_trip() {
+    let mut b = Budgets::default();
+    b.set(budget("food/groceries", "400.50")).unwrap();
+    b.set(Budget {
+        category: Category::new("rent").unwrap(),
+        limit: Money::parse("45000", "KES").unwrap(),
+    })
+    .unwrap();
+    assert_eq!(Budgets::parse_text(&b.render_text()).unwrap(), b);
+    assert!(Budgets::parse_text("food\t1\n").is_err());
+}
