@@ -25,3 +25,12 @@ Each transaction has eight fields:
 | 6 | category | `food/groceries` | Lowercase, `/` nests                         |
 | 7 | tags     | `trip,work`      | Comma-separated, may be empty                |
 | 8 | note     | `Weekly shop`    | Escaped, may be empty                        |
+
+## budgets.tsv
+
+Three fields per line: category, monthly limit, currency.
+
+```
+food	10000.00	KES
+rent	35000.00	KES
+```
