@@ -14,3 +14,4 @@ pub mod query;
 pub mod report;
 pub mod table;
 pub mod budget;
+pub mod recurring;
