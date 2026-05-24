@@ -40,3 +40,12 @@ impl Every {
         }
     }
 }
+impl fmt::Display for Every {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Every::Days(n) => write!(f, "{n}d"),
+            Every::Weeks(n) => write!(f, "{n}w"),
+            Every::Months(n) => write!(f, "{n}m"),
+        }
+    }
+}
