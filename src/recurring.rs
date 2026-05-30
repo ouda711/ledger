@@ -49,3 +49,20 @@ impl fmt::Display for Every {
         }
     }
 }
+impl Every {
+    /// The `n`th occurrence after `start` (the 0th is `start`).
+    ///
+    /// Always counted from the start date, so a rule starting on Jan 31 lands on
+    /// Feb 28 and then Mar 31, instead of drifting to the 28th forever.
+    pub fn nth(&self, start: Date, n: u32) -> Result<Date> {
+        match *self {
+            Every::Days(d) => start.add_days(d as i64 * n as i64),
+            Every::Weeks(w) => start.add_days(7 * w as i64 * n as i64),
+            Every::Months(m) => {
+                let months = i32::try_from(m as i64 * n as i64)
+                    .map_err(|_| crate::error::Error::Overflow)?;
+                start.add_months(months)
+            }
+        }
+    }
+}
