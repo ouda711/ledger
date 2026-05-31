@@ -17,3 +17,15 @@ fn parses_named_and_counted_intervals() {
     }
     assert_eq!(Every::Weeks(2).to_string(), "2w");
 }
+#[test]
+fn monthly_from_the_31st_does_not_drift() {
+    let start = d("2024-01-31");
+    let every = Every::Months(1);
+    assert_eq!(every.nth(start, 1).unwrap(), d("2024-02-29"));
+    assert_eq!(every.nth(start, 2).unwrap(), d("2024-03-31"));
+    assert_eq!(every.nth(start, 3).unwrap(), d("2024-04-30"));
+    assert_eq!(
+        Every::Weeks(2).nth(d("2024-01-01"), 3).unwrap(),
+        d("2024-02-12")
+    );
+}
