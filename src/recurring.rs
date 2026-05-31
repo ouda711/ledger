@@ -66,3 +66,20 @@ impl Every {
         }
     }
 }
+use crate::category::Category;
+use crate::money::Money;
+use crate::txn::{Kind, NewTransaction};
+
+/// A transaction that repeats, such as rent or a salary.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Rule {
+    pub id: u64,
+    pub every: Every,
+    pub start: Date,
+    /// How many occurrences have already been written to the ledger.
+    pub posted: u32,
+    pub kind: Kind,
+    pub amount: Money,
+    pub category: Category,
+    pub note: String,
+}
