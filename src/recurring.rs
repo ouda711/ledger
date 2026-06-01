@@ -83,3 +83,37 @@ pub struct Rule {
     pub category: Category,
     pub note: String,
 }
+impl Rule {
+    /// The date of the next occurrence not yet posted.
+    pub fn next_due(&self) -> Result<Date> {
+        self.every.nth(self.start, self.posted)
+    }
+
+    /// Every occurrence due on or before `until`, marking them posted.
+    pub fn take_due(&mut self, until: Date) -> Result<Vec<NewTransaction>> {
+        const LIMIT: usize = 1000;
+        let mut out = Vec::new();
+        loop {
+            let due = self.next_due()?;
+            if due > until {
+                break;
+            }
+            if out.len() == LIMIT {
+                return Err(parse_error(format!(
+                    "rule #{} has more than {LIMIT} occurrences due; check its start date",
+                    self.id
+                )));
+            }
+            out.push(NewTransaction {
+                date: due,
+                kind: self.kind,
+                amount: self.amount,
+                category: self.category.clone(),
+                note: self.note.clone(),
+                tags: vec!["recurring".to_string()],
+            });
+            self.posted += 1;
+        }
+        Ok(out)
+    }
+}
