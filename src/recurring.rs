@@ -117,3 +117,54 @@ impl Rule {
         Ok(out)
     }
 }
+use crate::error::Error;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Rules {
+    items: Vec<Rule>,
+    next_id: u64,
+}
+
+impl Default for Rules {
+    fn default() -> Self {
+        Rules {
+            items: Vec::new(),
+            next_id: 1,
+        }
+    }
+}
+
+impl Rules {
+    /// Add a rule; its id is assigned here.
+    pub fn add(&mut self, mut rule: Rule) -> Result<u64> {
+        crate::txn::validate_amount(&rule.amount)?;
+        crate::txn::validate_note(&rule.note)?;
+        rule.id = self.next_id;
+        self.next_id += 1;
+        self.items.push(rule);
+        Ok(self.next_id - 1)
+    }
+
+    pub fn remove(&mut self, id: u64) -> Result<Rule> {
+        let index = self
+            .items
+            .iter()
+            .position(|r| r.id == id)
+            .ok_or_else(|| Error::NotFound(format!("recurring rule #{id}")))?;
+        Ok(self.items.remove(index))
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Rule> {
+        self.items.iter()
+    }
+
+    /// Collect everything due up to `until` across all rules, oldest first.
+    pub fn take_due(&mut self, until: Date) -> Result<Vec<NewTransaction>> {
+        let mut out = Vec::new();
+        for rule in &mut self.items {
+            out.extend(rule.take_due(until)?);
+        }
+        out.sort_by_key(|t| t.date);
+        Ok(out)
+    }
+}
