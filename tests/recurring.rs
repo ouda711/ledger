@@ -57,3 +57,10 @@ fn take_due_posts_each_occurrence_once() {
     assert_eq!(rule.next_due().unwrap(), d("2024-04-01"));
     assert!(rule.take_due(d("2024-03-31")).unwrap().is_empty());
 }
+#[test]
+fn runaway_rules_are_refused() {
+    let mut rule = rent();
+    rule.every = Every::Days(1);
+    rule.start = d("2000-01-01");
+    assert!(rule.take_due(d("2024-01-01")).is_err());
+}
