@@ -29,3 +29,31 @@ fn monthly_from_the_31st_does_not_drift() {
         d("2024-02-12")
     );
 }
+use ledger::category::Category;
+use ledger::money::Money;
+use ledger::recurring::{Rule, Rules};
+use ledger::txn::Kind;
+
+fn rent() -> Rule {
+    Rule {
+        id: 0,
+        every: Every::Months(1),
+        start: d("2024-01-01"),
+        posted: 0,
+        kind: Kind::Expense,
+        amount: Money::parse("900", "USD").unwrap(),
+        category: Category::new("rent").unwrap(),
+        note: "Flat".into(),
+    }
+}
+
+#[test]
+fn take_due_posts_each_occurrence_once() {
+    let mut rule = rent();
+    let due = rule.take_due(d("2024-03-15")).unwrap();
+    let dates: Vec<String> = due.iter().map(|t| t.date.to_string()).collect();
+    assert_eq!(dates, ["2024-01-01", "2024-02-01", "2024-03-01"]);
+    assert_eq!(due[0].tags, vec!["recurring"]);
+    assert_eq!(rule.next_due().unwrap(), d("2024-04-01"));
+    assert!(rule.take_due(d("2024-03-31")).unwrap().is_empty());
+}
