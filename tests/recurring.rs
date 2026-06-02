@@ -64,3 +64,20 @@ fn runaway_rules_are_refused() {
     rule.start = d("2000-01-01");
     assert!(rule.take_due(d("2024-01-01")).is_err());
 }
+#[test]
+fn rules_assign_ids_and_merge_due_items_by_date() {
+    let mut rules = Rules::default();
+    assert_eq!(rules.add(rent()).unwrap(), 1);
+    let mut salary = rent();
+    salary.kind = Kind::Income;
+    salary.start = d("2024-01-25");
+    assert_eq!(rules.add(salary).unwrap(), 2);
+    let due = rules.take_due(d("2024-02-28")).unwrap();
+    let dates: Vec<String> = due.iter().map(|t| t.date.to_string()).collect();
+    assert_eq!(
+        dates,
+        ["2024-01-01", "2024-01-25", "2024-02-01", "2024-02-25"]
+    );
+    assert!(rules.remove(1).is_ok());
+    assert!(rules.remove(1).is_err());
+}
