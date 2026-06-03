@@ -168,3 +168,74 @@ impl Rules {
         Ok(out)
     }
 }
+use crate::store::{escape, read_optional, unescape, write_atomic};
+use std::path::Path;
+
+impl Rules {
+    pub fn render_text(&self) -> String {
+        let mut out = format!("# rules next={}\n", self.next_id);
+        for r in &self.items {
+            out.push_str(&format!(
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+                r.id,
+                r.every,
+                r.start,
+                r.posted,
+                r.kind.as_str(),
+                r.amount.to_decimal(),
+                r.amount.currency(),
+                escape(r.category.as_str()),
+                escape(&r.note)
+            ));
+        }
+        out
+    }
+
+    pub fn parse_text(text: &str) -> Result<Rules> {
+        let mut rules = Rules::default();
+        for (index, line) in text.lines().enumerate() {
+            let line_no = index + 1;
+            if let Some(n) = line.strip_prefix("# rules next=") {
+                rules.next_id = n
+                    .trim()
+                    .parse()
+                    .map_err(|_| parse_error(format!("rules line {line_no}: bad next id")))?;
+                continue;
+            }
+            if line.trim().is_empty() || line.starts_with('#') {
+                continue;
+            }
+            let f: Vec<&str> = line.split('\t').collect();
+            if f.len() != 9 {
+                return Err(parse_error(format!(
+                    "rules line {line_no}: expected 9 fields"
+                )));
+            }
+            let bad = |what: &str| parse_error(format!("rules line {line_no}: bad {what}"));
+            let rule = Rule {
+                id: f[0].parse().map_err(|_| bad("id"))?,
+                every: Every::parse(f[1])?,
+                start: Date::parse(f[2])?,
+                posted: f[3].parse().map_err(|_| bad("count"))?,
+                kind: Kind::parse(f[4])?,
+                amount: Money::parse(f[5], f[6])?,
+                category: Category::new(&unescape(f[7]))?,
+                note: unescape(f[8]),
+            };
+            rules.next_id = rules.next_id.max(rule.id + 1);
+            rules.items.push(rule);
+        }
+        Ok(rules)
+    }
+
+    pub fn load(path: &Path) -> Result<Rules> {
+        match read_optional(path)? {
+            Some(text) => Rules::parse_text(&text),
+            None => Ok(Rules::default()),
+        }
+    }
+
+    pub fn save(&self, path: &Path) -> Result<()> {
+        write_atomic(path, &self.render_text())
+    }
+}
