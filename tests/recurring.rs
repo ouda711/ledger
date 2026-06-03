@@ -81,3 +81,15 @@ fn rules_assign_ids_and_merge_due_items_by_date() {
     assert!(rules.remove(1).is_ok());
     assert!(rules.remove(1).is_err());
 }
+#[test]
+fn rules_round_trip() {
+    let mut rules = Rules::default();
+    rules.add(rent()).unwrap();
+    let mut gym = rent();
+    gym.every = Every::Weeks(1);
+    gym.note = "Gym\twith tab".into();
+    rules.add(gym).unwrap();
+    rules.take_due(d("2024-01-20")).unwrap();
+    let reparsed = Rules::parse_text(&rules.render_text()).unwrap();
+    assert_eq!(reparsed, rules);
+}
