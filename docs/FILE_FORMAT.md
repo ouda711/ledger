@@ -34,3 +34,11 @@ Three fields per line: category, monthly limit, currency.
 food	10000.00	KES
 rent	35000.00	KES
 ```
+
+## recurring.tsv
+
+A `# rules next=N` header, then nine fields per rule: id, interval (`1m`, `2w`, `3d`), start
+date, occurrences already posted, kind, amount, currency, category, note.
+
+The next due date is always computed from the start date and the posted count, never stored,
+so it cannot drift.
