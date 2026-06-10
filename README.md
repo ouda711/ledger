@@ -27,3 +27,12 @@ currency code, never as floating point. That means:
 
 Anywhere a date is accepted you can write `2024-03-31`, `today`, `yesterday`, or `-3`
 (three days ago).
+
+## Configuration
+
+| Variable          | Meaning                                                        |
+| ----------------- | -------------------------------------------------------------- |
+| `LEDGER_DIR`      | Where data is kept. Defaults to `~/.ledger`.                   |
+| `LEDGER_CURRENCY` | Currency used when a command has no `--currency`. No default.  |
+
+There is deliberately no built-in default currency: guessing wrong is a silent 100x error.
