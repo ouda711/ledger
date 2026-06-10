@@ -30,3 +30,16 @@ impl Config {
         Ok(Config { dir, currency })
     }
 }
+impl Config {
+    pub fn ledger_path(&self) -> PathBuf {
+        self.dir.join("ledger.tsv")
+    }
+
+    pub fn budgets_path(&self) -> PathBuf {
+        self.dir.join("budgets.tsv")
+    }
+
+    pub fn rules_path(&self) -> PathBuf {
+        self.dir.join("recurring.tsv")
+    }
+}
