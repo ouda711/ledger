@@ -16,3 +16,4 @@ pub mod table;
 pub mod budget;
 pub mod recurring;
 pub mod config;
+pub mod cli;
