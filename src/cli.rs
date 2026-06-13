@@ -50,3 +50,21 @@ impl Args {
         Ok(args)
     }
 }
+impl Args {
+    pub fn value(&self, name: &str) -> Option<&str> {
+        self.flags.get(name).map(String::as_str)
+    }
+
+    pub fn switch(&self, name: &str) -> bool {
+        self.switches.contains(name)
+    }
+
+    pub fn positional(&self, index: usize) -> Option<&str> {
+        self.positional.get(index).map(String::as_str)
+    }
+
+    pub fn expect_positional(&self, index: usize, what: &str) -> Result<&str> {
+        self.positional(index)
+            .ok_or_else(|| Error::Usage(format!("missing {what}")))
+    }
+}
