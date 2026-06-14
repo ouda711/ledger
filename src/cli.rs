@@ -68,3 +68,14 @@ impl Args {
             .ok_or_else(|| Error::Usage(format!("missing {what}")))
     }
 }
+impl Args {
+    /// Fail on any flag or switch not in `allowed`, so typos are not silently ignored.
+    pub fn allow(&self, allowed: &[&str]) -> Result<()> {
+        for name in self.flags.keys().chain(self.switches.iter()) {
+            if name != "help" && !allowed.contains(&name.as_str()) {
+                return Err(Error::Usage(format!("unknown option --{name}")));
+            }
+        }
+        Ok(())
+    }
+}
