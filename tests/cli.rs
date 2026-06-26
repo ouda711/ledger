@@ -22,3 +22,9 @@ fn parses_commands_flags_and_switches() {
     assert!(args.switch("income"));
     assert!(!args.switch("expense"));
 }
+#[test]
+fn missing_values_and_double_dash() {
+    assert!(Args::parse(&strings(&["add", "--category"])).is_err());
+    let args = Args::parse(&strings(&["add", "--", "-5"])).unwrap();
+    assert_eq!(args.positional(0), Some("-5"));
+}
