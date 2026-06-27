@@ -79,3 +79,12 @@ impl Args {
         Ok(())
     }
 }
+use crate::config::Config;
+use crate::date::Date;
+
+/// What a command needs besides its arguments.
+pub struct Context<'a> {
+    pub config: &'a Config,
+    /// Injected so commands are testable without depending on the clock.
+    pub today: Date,
+}
