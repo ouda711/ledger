@@ -28,3 +28,9 @@ fn missing_values_and_double_dash() {
     let args = Args::parse(&strings(&["add", "--", "-5"])).unwrap();
     assert_eq!(args.positional(0), Some("-5"));
 }
+#[test]
+fn unknown_flags_are_rejected() {
+    let args = Args::parse(&strings(&["list", "--catgory", "food"])).unwrap();
+    assert!(args.allow(&["category"]).is_err());
+    assert!(args.allow(&["catgory"]).is_ok());
+}
