@@ -88,3 +88,20 @@ pub struct Context<'a> {
     /// Injected so commands are testable without depending on the clock.
     pub today: Date,
 }
+use crate::date::parse_relative;
+use crate::money::normalise_currency;
+
+fn currency(args: &Args, ctx: &Context) -> Result<String> {
+    match args.value("currency") {
+        Some(c) => normalise_currency(c),
+        None => ctx.config.currency.clone().ok_or_else(|| {
+            Error::Usage("no currency: pass --currency or set LEDGER_CURRENCY".into())
+        }),
+    }
+}
+
+fn date_flag(args: &Args, name: &str, ctx: &Context) -> Result<Option<Date>> {
+    args.value(name)
+        .map(|v| parse_relative(v, ctx.today))
+        .transpose()
+}
