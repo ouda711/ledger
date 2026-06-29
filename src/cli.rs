@@ -105,3 +105,19 @@ fn date_flag(args: &Args, name: &str, ctx: &Context) -> Result<Option<Date>> {
         .map(|v| parse_relative(v, ctx.today))
         .transpose()
 }
+use crate::txn::Kind;
+
+fn kind_switch(args: &Args) -> Result<Option<Kind>> {
+    match (args.switch("income"), args.switch("expense")) {
+        (true, true) => Err(Error::Usage("choose one of --income or --expense".into())),
+        (true, false) => Ok(Some(Kind::Income)),
+        (false, true) => Ok(Some(Kind::Expense)),
+        (false, false) => Ok(None),
+    }
+}
+
+fn parse_id(text: &str) -> Result<u64> {
+    text.trim_start_matches('#')
+        .parse()
+        .map_err(|_| Error::Usage(format!("'{text}' is not a transaction id")))
+}
