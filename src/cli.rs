@@ -121,3 +121,12 @@ fn parse_id(text: &str) -> Result<u64> {
         .parse()
         .map_err(|_| Error::Usage(format!("'{text}' is not a transaction id")))
 }
+use crate::store::Ledger;
+
+fn load(ctx: &Context) -> Result<Ledger> {
+    Ledger::load(&ctx.config.ledger_path())
+}
+
+fn save(ledger: &Ledger, ctx: &Context) -> Result<()> {
+    ledger.save(&ctx.config.ledger_path())
+}
