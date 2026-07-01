@@ -130,3 +130,39 @@ fn load(ctx: &Context) -> Result<Ledger> {
 fn save(ledger: &Ledger, ctx: &Context) -> Result<()> {
     ledger.save(&ctx.config.ledger_path())
 }
+use crate::category::Category;
+use crate::money::Money;
+use crate::txn::{parse_tags, NewTransaction};
+use std::io::Write;
+
+/// `ledger add 12.50 --category food --note lunch`
+fn cmd_add(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[
+        "category", "note", "tags", "date", "currency", "income", "expense",
+    ])?;
+    let currency = currency(args, ctx)?;
+    let amount = Money::parse(args.expect_positional(0, "amount")?, &currency)?;
+    let item = NewTransaction {
+        date: date_flag(args, "date", ctx)?.unwrap_or(ctx.today),
+        kind: kind_switch(args)?.unwrap_or(Kind::Expense),
+        amount,
+        category: match args.value("category") {
+            Some(c) => Category::new(c)?,
+            None => Category::uncategorised(),
+        },
+        note: args.value("note").unwrap_or("").to_string(),
+        tags: parse_tags(args.value("tags").unwrap_or("")),
+    };
+    let mut ledger = load(ctx)?;
+    let id = ledger.add(item.clone())?;
+    save(&ledger, ctx)?;
+    writeln!(
+        out,
+        "Added #{id}: {} {} on {} ({})",
+        item.kind.as_str(),
+        item.amount,
+        item.date,
+        item.category
+    )?;
+    Ok(())
+}
