@@ -232,3 +232,35 @@ fn cmd_list(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     write!(out, "{}", table.render())?;
     Ok(())
 }
+/// `ledger show 12`
+fn cmd_show(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[])?;
+    let id = parse_id(args.expect_positional(0, "transaction id")?)?;
+    let ledger = load(ctx)?;
+    let t = ledger
+        .get(id)
+        .ok_or_else(|| Error::NotFound(format!("transaction #{id}")))?;
+    writeln!(out, "Transaction #{}", t.id)?;
+    writeln!(out, "  Date      {}", t.date)?;
+    writeln!(out, "  Kind      {}", t.kind.as_str())?;
+    writeln!(out, "  Amount    {}", t.amount)?;
+    writeln!(out, "  Category  {}", t.category)?;
+    if !t.tags.is_empty() {
+        writeln!(out, "  Tags      {}", t.tags.join(", "))?;
+    }
+    if !t.note.is_empty() {
+        writeln!(out, "  Note      {}", t.note)?;
+    }
+    Ok(())
+}
+
+/// `ledger rm 12`
+fn cmd_rm(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[])?;
+    let id = parse_id(args.expect_positional(0, "transaction id")?)?;
+    let mut ledger = load(ctx)?;
+    let removed = ledger.remove(id)?;
+    save(&ledger, ctx)?;
+    writeln!(out, "Removed #{id}: {} on {}", removed.amount, removed.date)?;
+    Ok(())
+}
