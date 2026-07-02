@@ -191,3 +191,44 @@ fn filter_from(args: &Args, ctx: &Context) -> Result<Filter> {
     filter.currency = args.value("currency").map(normalise_currency).transpose()?;
     Ok(filter)
 }
+use crate::query::select;
+use crate::table::{truncate, Align, Table};
+
+/// `ledger list --month 2024-03 --category food`
+fn cmd_list(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    let mut allowed = FILTER_FLAGS.to_vec();
+    allowed.push("limit");
+    args.allow(&allowed)?;
+    let ledger = load(ctx)?;
+    let filter = filter_from(args, ctx)?;
+    let mut rows = select(ledger.transactions(), &filter);
+    if let Some(limit) = args.value("limit") {
+        let n: usize = limit
+            .parse()
+            .map_err(|_| Error::Usage(format!("--limit '{limit}' is not a number")))?;
+        let skip = rows.len().saturating_sub(n);
+        rows.drain(..skip);
+    }
+    if rows.is_empty() {
+        writeln!(out, "No transactions.")?;
+        return Ok(());
+    }
+    let mut table = Table::new(&[
+        ("ID", Align::Right),
+        ("Date", Align::Left),
+        ("Category", Align::Left),
+        ("Amount", Align::Right),
+        ("Note", Align::Left),
+    ]);
+    for t in rows {
+        table.push(vec![
+            format!("#{}", t.id),
+            t.date.to_string(),
+            truncate(t.category.as_str(), 24),
+            t.signed()?.to_string(),
+            truncate(&t.note, 40),
+        ]);
+    }
+    write!(out, "{}", table.render())?;
+    Ok(())
+}
