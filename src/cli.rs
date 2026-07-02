@@ -166,3 +166,28 @@ fn cmd_add(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     )?;
     Ok(())
 }
+use crate::date::Month;
+use crate::query::Filter;
+
+const FILTER_FLAGS: &[&str] = &[
+    "from", "to", "month", "category", "tag", "search", "currency", "income", "expense",
+];
+
+fn filter_from(args: &Args, ctx: &Context) -> Result<Filter> {
+    let mut filter = match args.value("month") {
+        Some(m) => Filter::for_month(Month::parse(m)?),
+        None => Filter::default(),
+    };
+    if let Some(from) = date_flag(args, "from", ctx)? {
+        filter.from = Some(from);
+    }
+    if let Some(to) = date_flag(args, "to", ctx)? {
+        filter.to = Some(to);
+    }
+    filter.category = args.value("category").map(Category::new).transpose()?;
+    filter.kind = kind_switch(args)?;
+    filter.tag = args.value("tag").map(str::to_string);
+    filter.text = args.value("search").map(str::to_string);
+    filter.currency = args.value("currency").map(normalise_currency).transpose()?;
+    Ok(filter)
+}
