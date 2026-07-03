@@ -264,3 +264,57 @@ fn cmd_rm(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     writeln!(out, "Removed #{id}: {} on {}", removed.amount, removed.date)?;
     Ok(())
 }
+/// `ledger edit 12 --amount 15 --note "team lunch"`
+fn cmd_edit(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[
+        "amount", "date", "category", "note", "tags", "income", "expense",
+    ])?;
+    let id = parse_id(args.expect_positional(0, "transaction id")?)?;
+    let mut ledger = load(ctx)?;
+    let existing = ledger
+        .get(id)
+        .ok_or_else(|| Error::NotFound(format!("transaction #{id}")))?;
+    let amount = args
+        .value("amount")
+        .map(|a| Money::parse(a, existing.amount.currency()))
+        .transpose()?;
+    let date = date_flag(args, "date", ctx)?;
+    let category = args.value("category").map(Category::new).transpose()?;
+    let kind = kind_switch(args)?;
+    let note = args.value("note").map(str::to_string);
+    let tags = args.value("tags").map(parse_tags);
+    if amount.is_none()
+        && date.is_none()
+        && category.is_none()
+        && kind.is_none()
+        && note.is_none()
+        && tags.is_none()
+    {
+        return Err(Error::Usage(
+            "nothing to change; pass at least one option".into(),
+        ));
+    }
+    ledger.update(id, |t| {
+        if let Some(v) = amount {
+            t.amount = v;
+        }
+        if let Some(v) = date {
+            t.date = v;
+        }
+        if let Some(v) = category {
+            t.category = v;
+        }
+        if let Some(v) = kind {
+            t.kind = v;
+        }
+        if let Some(v) = note {
+            t.note = v;
+        }
+        if let Some(v) = tags {
+            t.tags = v;
+        }
+    })?;
+    save(&ledger, ctx)?;
+    writeln!(out, "Updated #{id}.")?;
+    Ok(())
+}
