@@ -318,3 +318,33 @@ fn cmd_edit(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     writeln!(out, "Updated #{id}.")?;
     Ok(())
 }
+use crate::report::{by_category, monthly, totals};
+
+/// `ledger summary --month 2024-03`: income, expense and net per currency.
+fn cmd_summary(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(FILTER_FLAGS)?;
+    let ledger = load(ctx)?;
+    let filter = filter_from(args, ctx)?;
+    let rows = select(ledger.transactions(), &filter);
+    let sums = totals(&rows)?;
+    if sums.is_empty() {
+        writeln!(out, "No transactions.")?;
+        return Ok(());
+    }
+    let mut table = Table::new(&[
+        ("Currency", Align::Left),
+        ("Income", Align::Right),
+        ("Expense", Align::Right),
+        ("Net", Align::Right),
+    ]);
+    for s in sums {
+        table.push(vec![
+            s.currency.clone(),
+            s.income.to_decimal(),
+            s.expense.to_decimal(),
+            s.net()?.to_decimal(),
+        ]);
+    }
+    write!(out, "{}", table.render())?;
+    Ok(())
+}
