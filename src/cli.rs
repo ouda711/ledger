@@ -348,3 +348,32 @@ fn cmd_summary(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     write!(out, "{}", table.render())?;
     Ok(())
 }
+/// `ledger months`: one line per month and currency.
+fn cmd_months(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(FILTER_FLAGS)?;
+    let ledger = load(ctx)?;
+    let rows = select(ledger.transactions(), &filter_from(args, ctx)?);
+    let months = monthly(&rows)?;
+    if months.is_empty() {
+        writeln!(out, "No transactions.")?;
+        return Ok(());
+    }
+    let mut table = Table::new(&[
+        ("Month", Align::Left),
+        ("Currency", Align::Left),
+        ("Income", Align::Right),
+        ("Expense", Align::Right),
+        ("Net", Align::Right),
+    ]);
+    for m in months {
+        table.push(vec![
+            m.month.to_string(),
+            m.totals.currency.clone(),
+            m.totals.income.to_decimal(),
+            m.totals.expense.to_decimal(),
+            m.totals.net()?.to_decimal(),
+        ]);
+    }
+    write!(out, "{}", table.render())?;
+    Ok(())
+}
