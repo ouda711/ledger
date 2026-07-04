@@ -377,3 +377,39 @@ fn cmd_months(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     write!(out, "{}", table.render())?;
     Ok(())
 }
+/// `ledger categories --month 2024-03 --depth 1`: where the money went.
+fn cmd_categories(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    let mut allowed = FILTER_FLAGS.to_vec();
+    allowed.push("depth");
+    args.allow(&allowed)?;
+    let ledger = load(ctx)?;
+    let mut filter = filter_from(args, ctx)?;
+    let kind = filter.kind.take().unwrap_or(Kind::Expense);
+    let depth = args
+        .value("depth")
+        .map(|d| {
+            d.parse::<usize>()
+                .map_err(|_| Error::Usage(format!("--depth '{d}' is not a number")))
+        })
+        .transpose()?;
+    let rows = select(ledger.transactions(), &filter);
+    let groups = by_category(&rows, kind, depth)?;
+    if groups.is_empty() {
+        writeln!(out, "No {} transactions.", kind.as_str())?;
+        return Ok(());
+    }
+    let mut table = Table::new(&[
+        ("Category", Align::Left),
+        ("Count", Align::Right),
+        ("Total", Align::Right),
+    ]);
+    for g in groups {
+        table.push(vec![
+            g.category.to_string(),
+            g.count.to_string(),
+            g.total.to_string(),
+        ]);
+    }
+    write!(out, "{}", table.render())?;
+    Ok(())
+}
