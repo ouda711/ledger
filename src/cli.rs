@@ -413,3 +413,36 @@ fn cmd_categories(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()>
     write!(out, "{}", table.render())?;
     Ok(())
 }
+use crate::budget::{Budget, Budgets};
+
+fn load_budgets(ctx: &Context) -> Result<Budgets> {
+    Budgets::load(&ctx.config.budgets_path())
+}
+
+/// `ledger budget set food 400` and `ledger budget rm food`
+fn cmd_budget_change(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    let mut budgets = load_budgets(ctx)?;
+    match args.positional(0) {
+        Some("set") => {
+            args.allow(&["currency"])?;
+            let category = Category::new(args.expect_positional(1, "category")?)?;
+            let limit = Money::parse(
+                args.expect_positional(2, "monthly limit")?,
+                &currency(args, ctx)?,
+            )?;
+            budgets.set(Budget {
+                category: category.clone(),
+                limit,
+            })?;
+            writeln!(out, "Budget for {category}: {limit} a month.")?;
+        }
+        Some("rm") => {
+            args.allow(&[])?;
+            let category = Category::new(args.expect_positional(1, "category")?)?;
+            budgets.remove(&category)?;
+            writeln!(out, "Removed budget for {category}.")?;
+        }
+        _ => unreachable!("dispatched only for set and rm"),
+    }
+    budgets.save(&ctx.config.budgets_path())
+}
