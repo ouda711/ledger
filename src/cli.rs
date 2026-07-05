@@ -446,3 +446,46 @@ fn cmd_budget_change(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<
     }
     budgets.save(&ctx.config.budgets_path())
 }
+use crate::money::format_bp;
+
+/// `ledger budget --month 2024-03`: spent and remaining for each budget.
+fn cmd_budget_show(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&["month"])?;
+    let month = match args.value("month") {
+        Some(m) => Month::parse(m)?,
+        None => Month::of(&ctx.today),
+    };
+    let budgets = load_budgets(ctx)?;
+    if budgets.is_empty() {
+        writeln!(
+            out,
+            "No budgets. Add one with: ledger budget set <category> <amount>"
+        )?;
+        return Ok(());
+    }
+    let ledger = load(ctx)?;
+    let mut table = Table::new(&[
+        ("Category", Align::Left),
+        ("Limit", Align::Right),
+        ("Spent", Align::Right),
+        ("Left", Align::Right),
+        ("Used", Align::Right),
+    ]);
+    for s in budgets.statuses(ledger.transactions(), month)? {
+        let used = s.used_bp.map(format_bp).unwrap_or_else(|| "-".into());
+        table.push(vec![
+            s.budget.category.to_string(),
+            s.budget.limit.to_string(),
+            s.spent.to_decimal(),
+            s.remaining.to_decimal(),
+            if s.is_over() {
+                format!("{used} over")
+            } else {
+                used
+            },
+        ]);
+    }
+    writeln!(out, "Budgets for {month}")?;
+    write!(out, "{}", table.render())?;
+    Ok(())
+}
