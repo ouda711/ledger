@@ -515,3 +515,18 @@ fn cmd_import(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     writeln!(out, "Imported {} transaction(s) from {path}.", ids.len())?;
     Ok(())
 }
+/// `ledger export [file.csv]` with the same filters as `list`. Prints to stdout without a file.
+fn cmd_export(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(FILTER_FLAGS)?;
+    let ledger = load(ctx)?;
+    let rows = select(ledger.transactions(), &filter_from(args, ctx)?);
+    let text = csv::export(rows.iter().copied());
+    match args.positional(0) {
+        Some(path) => {
+            std::fs::write(path, &text)?;
+            writeln!(out, "Exported {} transaction(s) to {path}.", rows.len())?;
+        }
+        None => write!(out, "{text}")?,
+    }
+    Ok(())
+}
