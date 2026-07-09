@@ -489,3 +489,29 @@ fn cmd_budget_show(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()
     write!(out, "{}", table.render())?;
     Ok(())
 }
+use crate::csv;
+
+/// `ledger import bank.csv --currency KES [--dry-run]`
+fn cmd_import(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&["currency", "dry-run"])?;
+    let path = args.expect_positional(0, "CSV file")?;
+    let text = std::fs::read_to_string(path)?;
+    let fallback = match args.value("currency") {
+        Some(c) => Some(normalise_currency(c)?),
+        None => ctx.config.currency.clone(),
+    };
+    let items = csv::import(&text, fallback.as_deref())?;
+    if args.switch("dry-run") {
+        writeln!(
+            out,
+            "Would import {} transaction(s) from {path}.",
+            items.len()
+        )?;
+        return Ok(());
+    }
+    let mut ledger = load(ctx)?;
+    let ids = ledger.add_all(items)?;
+    save(&ledger, ctx)?;
+    writeln!(out, "Imported {} transaction(s) from {path}.", ids.len())?;
+    Ok(())
+}
