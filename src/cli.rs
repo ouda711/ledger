@@ -530,3 +530,40 @@ fn cmd_export(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     }
     Ok(())
 }
+use crate::recurring::{Every, Rule, Rules};
+
+fn load_rules(ctx: &Context) -> Result<Rules> {
+    Rules::load(&ctx.config.rules_path())
+}
+
+/// `ledger recurring add 1200 --every monthly --category rent --start 2024-01-01`
+fn cmd_recurring_add(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[
+        "every", "start", "category", "note", "currency", "income", "expense",
+    ])?;
+    let every = Every::parse(
+        args.value("every")
+            .ok_or_else(|| Error::Usage("missing --every (e.g. monthly)".into()))?,
+    )?;
+    let currency = currency(args, ctx)?;
+    let rule = Rule {
+        id: 0,
+        every,
+        start: date_flag(args, "start", ctx)?.unwrap_or(ctx.today),
+        posted: 0,
+        kind: kind_switch(args)?.unwrap_or(Kind::Expense),
+        amount: Money::parse(args.expect_positional(1, "amount")?, &currency)?,
+        category: match args.value("category") {
+            Some(c) => Category::new(c)?,
+            None => Category::uncategorised(),
+        },
+        note: args.value("note").unwrap_or("").to_string(),
+    };
+    let mut rules = load_rules(ctx)?;
+    let summary = format!("{} every {} from {}", rule.amount, rule.every, rule.start);
+    let id = rules.add(rule)?;
+    rules.save(&ctx.config.rules_path())?;
+    writeln!(out, "Added recurring rule #{id}: {summary}.")?;
+    writeln!(out, "Run `ledger recurring run` to post what is due.")?;
+    Ok(())
+}
