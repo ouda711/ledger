@@ -607,3 +607,33 @@ fn cmd_recurring_rm(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<(
     writeln!(out, "Removed recurring rule #{id}.")?;
     Ok(())
 }
+/// `ledger recurring run [--until 2024-06-30] [--dry-run]`
+fn cmd_recurring_run(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&["until", "dry-run"])?;
+    let until = date_flag(args, "until", ctx)?.unwrap_or(ctx.today);
+    let mut rules = load_rules(ctx)?;
+    let due = rules.take_due(until)?;
+    if args.switch("dry-run") {
+        writeln!(
+            out,
+            "Would post {} transaction(s) up to {until}.",
+            due.len()
+        )?;
+        return Ok(());
+    }
+    if due.is_empty() {
+        writeln!(out, "Nothing due up to {until}.")?;
+        return Ok(());
+    }
+    let mut ledger = load(ctx)?;
+    let count = ledger.add_all(due)?.len();
+    // Save the ledger first: if saving the rules fails, rerunning would duplicate,
+    // so report it loudly instead of hiding it.
+    save(&ledger, ctx)?;
+    rules.save(&ctx.config.rules_path())?;
+    writeln!(
+        out,
+        "Posted {count} recurring transaction(s) up to {until}."
+    )?;
+    Ok(())
+}
