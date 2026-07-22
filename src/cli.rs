@@ -567,3 +567,43 @@ fn cmd_recurring_add(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<
     writeln!(out, "Run `ledger recurring run` to post what is due.")?;
     Ok(())
 }
+fn cmd_recurring_list(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[])?;
+    let rules = load_rules(ctx)?;
+    let mut table = Table::new(&[
+        ("ID", Align::Right),
+        ("Every", Align::Left),
+        ("Next due", Align::Left),
+        ("Category", Align::Left),
+        ("Amount", Align::Right),
+    ]);
+    for r in rules.iter() {
+        let signed = match r.kind {
+            Kind::Income => r.amount,
+            Kind::Expense => r.amount.negate()?,
+        };
+        table.push(vec![
+            format!("#{}", r.id),
+            r.every.to_string(),
+            r.next_due()?.to_string(),
+            r.category.to_string(),
+            signed.to_string(),
+        ]);
+    }
+    if table.is_empty() {
+        writeln!(out, "No recurring rules.")?;
+    } else {
+        write!(out, "{}", table.render())?;
+    }
+    Ok(())
+}
+
+fn cmd_recurring_rm(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[])?;
+    let id = parse_id(args.expect_positional(1, "rule id")?)?;
+    let mut rules = load_rules(ctx)?;
+    rules.remove(id)?;
+    rules.save(&ctx.config.rules_path())?;
+    writeln!(out, "Removed recurring rule #{id}.")?;
+    Ok(())
+}
