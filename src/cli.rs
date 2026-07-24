@@ -637,3 +637,14 @@ fn cmd_recurring_run(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<
     )?;
     Ok(())
 }
+use crate::money::{currency_exponent, supported_currencies};
+
+fn cmd_currencies(args: &Args, out: &mut dyn Write) -> Result<()> {
+    args.allow(&[])?;
+    let mut table = Table::new(&[("Code", Align::Left), ("Decimals", Align::Right)]);
+    for code in supported_currencies() {
+        table.push(vec![code.to_string(), currency_exponent(code)?.to_string()]);
+    }
+    write!(out, "{}", table.render())?;
+    Ok(())
+}
