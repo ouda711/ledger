@@ -648,3 +648,38 @@ fn cmd_currencies(args: &Args, out: &mut dyn Write) -> Result<()> {
     write!(out, "{}", table.render())?;
     Ok(())
 }
+pub const HELP: &str = "\
+ledger - track income and spending from the command line
+
+USAGE:
+    ledger <command> [options]
+
+COMMANDS:
+    add <amount>            Record a transaction (expense unless --income)
+    list                    Show transactions
+    show <id>               Show one transaction
+    edit <id>               Change a transaction
+    rm <id>                 Delete a transaction
+    summary                 Income, expense and net per currency
+    months                  Month-by-month totals
+    categories              Totals by category (--depth N to roll up)
+    budget                  Budget report (--month YYYY-MM)
+    budget set <cat> <amt>  Set a monthly budget
+    budget rm <cat>         Remove a budget
+    recurring add <amt>     Add a repeating transaction (--every monthly)
+    recurring list          Show recurring rules
+    recurring rm <id>       Remove a rule
+    recurring run           Post everything due (--until DATE)
+    import <file.csv>       Import transactions from CSV
+    export [file.csv]       Export transactions as CSV
+    currencies              List supported currencies
+
+COMMON OPTIONS:
+    --currency CODE   ISO 4217 code; defaults to $LEDGER_CURRENCY
+    --date DATE       YYYY-MM-DD, today, yesterday or -N (days ago)
+    --category NAME   Nested with '/', e.g. food/groceries
+    --income | --expense
+    --month YYYY-MM, --from DATE, --to DATE, --tag T, --search TEXT
+
+Data is kept in $LEDGER_DIR (default ~/.ledger).
+";
