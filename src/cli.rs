@@ -683,3 +683,47 @@ COMMON OPTIONS:
 
 Data is kept in $LEDGER_DIR (default ~/.ledger).
 ";
+/// Run one command line against `ctx`, writing human-readable output to `out`.
+pub fn run(raw: &[String], ctx: &Context, out: &mut dyn Write) -> Result<()> {
+    let args = Args::parse(raw)?;
+    if args.switch("version") {
+        writeln!(out, "ledger {}", env!("CARGO_PKG_VERSION"))?;
+        return Ok(());
+    }
+    let command = match args.command.as_deref() {
+        None | Some("help") => {
+            write!(out, "{HELP}")?;
+            return Ok(());
+        }
+        Some(_) if args.switch("help") => {
+            write!(out, "{HELP}")?;
+            return Ok(());
+        }
+        Some(c) => c,
+    };
+    match (command, args.positional(0)) {
+        ("add", _) => cmd_add(&args, ctx, out),
+        ("list" | "ls", _) => cmd_list(&args, ctx, out),
+        ("show", _) => cmd_show(&args, ctx, out),
+        ("edit", _) => cmd_edit(&args, ctx, out),
+        ("rm" | "remove", _) => cmd_rm(&args, ctx, out),
+        ("summary", _) => cmd_summary(&args, ctx, out),
+        ("months", _) => cmd_months(&args, ctx, out),
+        ("categories", _) => cmd_categories(&args, ctx, out),
+        ("budget", Some("set" | "rm")) => cmd_budget_change(&args, ctx, out),
+        ("budget", None | Some("show")) => cmd_budget_show(&args, ctx, out),
+        ("recurring", Some("add")) => cmd_recurring_add(&args, ctx, out),
+        ("recurring", None | Some("list")) => cmd_recurring_list(&args, ctx, out),
+        ("recurring", Some("rm")) => cmd_recurring_rm(&args, ctx, out),
+        ("recurring", Some("run")) => cmd_recurring_run(&args, ctx, out),
+        ("import", _) => cmd_import(&args, ctx, out),
+        ("export", _) => cmd_export(&args, ctx, out),
+        ("currencies", _) => cmd_currencies(&args, out),
+        (other, Some(sub)) if matches!(other, "budget" | "recurring") => {
+            Err(Error::Usage(format!("unknown {other} command '{sub}'")))
+        }
+        (other, _) => Err(Error::Usage(format!(
+            "unknown command '{other}'; run `ledger help`"
+        ))),
+    }
+}
