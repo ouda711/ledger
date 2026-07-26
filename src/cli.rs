@@ -727,3 +727,12 @@ pub fn run(raw: &[String], ctx: &Context, out: &mut dyn Write) -> Result<()> {
         ))),
     }
 }
+/// Run with configuration from the environment and today's date.
+pub fn main_with_env(raw: &[String], out: &mut dyn Write) -> Result<()> {
+    let config = Config::from_env()?;
+    let ctx = Context {
+        config: &config,
+        today: crate::date::today(),
+    };
+    run(raw, &ctx, out)
+}
