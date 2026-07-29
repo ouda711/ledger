@@ -36,3 +36,15 @@ Anywhere a date is accepted you can write `2024-03-31`, `today`, `yesterday`, or
 | `LEDGER_CURRENCY` | Currency used when a command has no `--currency`. No default.  |
 
 There is deliberately no built-in default currency: guessing wrong is a silent 100x error.
+
+## Recording transactions
+
+```sh
+export LEDGER_CURRENCY=KES
+
+ledger add 450 --category food/lunch --note "Chapati and beans"
+ledger add 85000 --income --category salary --date 2024-03-01
+ledger add 1200 --category transport --tags work,client-visit --date yesterday
+```
+
+Transactions are expenses unless you pass `--income`. Categories nest with `/`.
