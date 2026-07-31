@@ -17,3 +17,5 @@ pub mod budget;
 pub mod recurring;
 pub mod config;
 pub mod cli;
+pub use error::{Error, Result};
+pub use money::Money;
