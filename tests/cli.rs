@@ -83,3 +83,19 @@ impl Drop for Env {
         let _ = std::fs::remove_dir_all(&self.config.dir);
     }
 }
+#[test]
+fn add_records_an_expense_by_default() {
+    let env = Env::new();
+    let out = env.run(&["add", "12.50", "--category", "Food", "--note", "lunch"]);
+    assert_eq!(out, "Added #1: expense USD 12.50 on 2024-03-15 (food)\n");
+    let out = env.run(&[
+        "add",
+        "3000",
+        "--income",
+        "--date",
+        "yesterday",
+        "--currency",
+        "kes",
+    ]);
+    assert!(out.contains("income KES 3,000.00 on 2024-03-14"), "{out}");
+}
