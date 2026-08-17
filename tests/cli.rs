@@ -99,3 +99,13 @@ fn add_records_an_expense_by_default() {
     ]);
     assert!(out.contains("income KES 3,000.00 on 2024-03-14"), "{out}");
 }
+#[test]
+fn add_without_any_currency_is_a_usage_error() {
+    let mut env = Env::new();
+    env.config.currency = None;
+    let err = env.try_run(&["add", "5"]).unwrap_err();
+    assert!(matches!(err, ledger::Error::Usage(_)));
+    assert!(env
+        .try_run(&["add", "5", "--income", "--expense", "--currency", "USD"])
+        .is_err());
+}
