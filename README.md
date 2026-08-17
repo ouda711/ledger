@@ -48,3 +48,15 @@ ledger add 1200 --category transport --tags work,client-visit --date yesterday
 ```
 
 Transactions are expenses unless you pass `--income`. Categories nest with `/`.
+
+## Listing, editing and removing
+
+```sh
+ledger list                         # everything
+ledger list --month 2024-03         # one month
+ledger list --category food         # food and everything under it
+ledger list --tag work --limit 10   # the last ten work expenses
+ledger show 12
+ledger edit 12 --amount 500 --note "Lunch with team"
+ledger rm 12
+```
