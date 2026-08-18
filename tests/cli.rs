@@ -109,3 +109,27 @@ fn add_without_any_currency_is_a_usage_error() {
         .try_run(&["add", "5", "--income", "--expense", "--currency", "USD"])
         .is_err());
 }
+#[test]
+fn list_shows_signed_amounts_and_filters() {
+    let env = Env::new();
+    assert_eq!(env.run(&["list"]), "No transactions.\n");
+    env.run(&["add", "10", "--category", "food", "--date", "2024-03-01"]);
+    env.run(&[
+        "add",
+        "2000",
+        "--income",
+        "--category",
+        "salary",
+        "--date",
+        "2024-02-28",
+    ]);
+    let out = env.run(&["list"]);
+    assert!(out.contains("USD -10.00"), "{out}");
+    assert!(out.contains("USD 2,000.00"), "{out}");
+    let food = env.run(&["list", "--category", "food"]);
+    assert!(!food.contains("salary"));
+    let march = env.run(&["list", "--month", "2024-03"]);
+    assert_eq!(march.lines().count(), 3);
+    let last = env.run(&["list", "--limit", "1"]);
+    assert!(last.contains("food") && !last.contains("salary"));
+}
