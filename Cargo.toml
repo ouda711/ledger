@@ -10,3 +10,7 @@ keywords = ["finance", "budget", "cli", "money", "expenses"]
 categories = ["command-line-utilities"]
 
 [dependencies]
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
