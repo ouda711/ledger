@@ -133,3 +133,19 @@ fn list_shows_signed_amounts_and_filters() {
     let last = env.run(&["list", "--limit", "1"]);
     assert!(last.contains("food") && !last.contains("salary"));
 }
+#[test]
+fn show_and_remove() {
+    let env = Env::new();
+    env.run(&["add", "7", "--tags", "trip", "--note", "taxi"]);
+    let out = env.run(&["show", "#1"]);
+    assert!(
+        out.contains("Tags      trip") && out.contains("Note      taxi"),
+        "{out}"
+    );
+    assert!(env.run(&["rm", "1"]).starts_with("Removed #1"));
+    assert!(matches!(
+        env.try_run(&["show", "1"]),
+        Err(ledger::Error::NotFound(_))
+    ));
+    assert!(env.try_run(&["rm", "abc"]).is_err());
+}
