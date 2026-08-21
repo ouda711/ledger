@@ -149,3 +149,24 @@ fn show_and_remove() {
     ));
     assert!(env.try_run(&["rm", "abc"]).is_err());
 }
+#[test]
+fn edit_changes_only_given_fields() {
+    let env = Env::new();
+    env.run(&["add", "7", "--category", "taxi", "--note", "airport"]);
+    env.run(&[
+        "edit",
+        "1",
+        "--amount",
+        "8.25",
+        "--category",
+        "transport/taxi",
+    ]);
+    let out = env.run(&["show", "1"]);
+    assert!(
+        out.contains("USD 8.25") && out.contains("transport/taxi") && out.contains("airport"),
+        "{out}"
+    );
+    assert!(env.try_run(&["edit", "1"]).is_err());
+    assert!(env.try_run(&["edit", "1", "--amount", "0"]).is_err());
+    assert!(env.try_run(&["edit", "1", "--amount", "1.001"]).is_err());
+}
