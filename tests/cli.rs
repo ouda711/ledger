@@ -170,3 +170,21 @@ fn edit_changes_only_given_fields() {
     assert!(env.try_run(&["edit", "1", "--amount", "0"]).is_err());
     assert!(env.try_run(&["edit", "1", "--amount", "1.001"]).is_err());
 }
+#[test]
+fn summary_per_currency() {
+    let env = Env::new();
+    env.run(&["add", "100", "--income"]);
+    env.run(&["add", "30.25"]);
+    env.run(&["add", "500", "--currency", "KES"]);
+    let out = env.run(&["summary"]);
+    let lines: Vec<&str> = out.lines().collect();
+    assert_eq!(lines.len(), 4, "{out}");
+    assert!(
+        lines[2].starts_with("KES") && lines[2].ends_with("-500.00"),
+        "{out}"
+    );
+    assert!(
+        lines[3].starts_with("USD") && lines[3].ends_with("69.75"),
+        "{out}"
+    );
+}
