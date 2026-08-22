@@ -60,3 +60,19 @@ ledger show 12
 ledger edit 12 --amount 500 --note "Lunch with team"
 ledger rm 12
 ```
+
+## Reports
+
+```sh
+ledger summary --month 2024-03      # income, expense, net per currency
+ledger months                       # month-by-month totals
+ledger categories --depth 1         # where the money went, rolled up
+```
+
+```
+Category   Count          Total
+---------  -----  -------------
+rent           1  KES 35,000.00
+food           9   KES 8,450.00
+transport      6   KES 4,200.00
+```
