@@ -188,3 +188,37 @@ fn summary_per_currency() {
         "{out}"
     );
 }
+#[test]
+fn months_and_categories() {
+    let env = Env::new();
+    env.run(&[
+        "add",
+        "10",
+        "--category",
+        "food/groceries",
+        "--date",
+        "2024-02-10",
+    ]);
+    env.run(&[
+        "add",
+        "5",
+        "--category",
+        "food/coffee",
+        "--date",
+        "2024-03-01",
+    ]);
+    let months = env.run(&["months"]);
+    assert!(
+        months.contains("2024-02") && months.contains("2024-03"),
+        "{months}"
+    );
+    let cats = env.run(&["categories", "--depth", "1"]);
+    assert!(
+        cats.contains("food") && cats.contains("USD 15.00"),
+        "{cats}"
+    );
+    assert_eq!(
+        env.run(&["categories", "--income"]),
+        "No income transactions.\n"
+    );
+}
