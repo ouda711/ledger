@@ -76,3 +76,14 @@ rent           1  KES 35,000.00
 food           9   KES 8,450.00
 transport      6   KES 4,200.00
 ```
+
+## Budgets
+
+```sh
+ledger budget set food 10000
+ledger budget set transport 6000
+ledger budget                       # this month
+ledger budget --month 2024-02
+```
+
+A budget covers its category and everything nested under it.
