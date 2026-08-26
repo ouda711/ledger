@@ -235,3 +235,22 @@ fn budget_commands() {
     assert!(env.try_run(&["budget", "rm", "food"]).is_err());
     assert!(env.try_run(&["budget", "frobnicate"]).is_err());
 }
+#[test]
+fn import_and_export_files() {
+    let env = Env::new();
+    std::fs::create_dir_all(&env.config.dir).unwrap();
+    let csv_path = env.config.dir.join("bank.csv");
+    std::fs::write(
+        &csv_path,
+        "date,amount,note\n2024-03-01,-4.50,coffee\n2024-03-02,250,refund\n",
+    )
+    .unwrap();
+    let path = csv_path.to_str().unwrap();
+    assert!(env
+        .run(&["import", path, "--dry-run"])
+        .starts_with("Would import 2"));
+    assert_eq!(env.run(&["list"]), "No transactions.\n");
+    assert!(env.run(&["import", path]).starts_with("Imported 2"));
+    let exported = env.run(&["export", "--expense"]);
+    assert_eq!(exported, "date,kind,amount,currency,category,tags,note\n2024-03-01,expense,4.50,USD,uncategorised,,coffee\n");
+}
