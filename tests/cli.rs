@@ -222,3 +222,16 @@ fn months_and_categories() {
         "No income transactions.\n"
     );
 }
+#[test]
+fn budget_commands() {
+    let env = Env::new();
+    assert!(env.run(&["budget"]).starts_with("No budgets."));
+    env.run(&["budget", "set", "food", "100"]);
+    env.run(&["add", "120", "--category", "food/groceries"]);
+    let out = env.run(&["budget"]);
+    assert!(out.starts_with("Budgets for 2024-03"), "{out}");
+    assert!(out.contains("120.00% over"), "{out}");
+    env.run(&["budget", "rm", "food"]);
+    assert!(env.try_run(&["budget", "rm", "food"]).is_err());
+    assert!(env.try_run(&["budget", "frobnicate"]).is_err());
+}
