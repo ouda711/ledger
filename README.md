@@ -87,3 +87,15 @@ ledger budget --month 2024-02
 ```
 
 A budget covers its category and everything nested under it.
+
+## Recurring transactions
+
+```sh
+ledger recurring add 35000 --every monthly --start 2024-01-01 --category rent
+ledger recurring add 85000 --income --every monthly --start 2024-01-25 --category salary
+ledger recurring run                # post everything due up to today
+```
+
+Intervals: `daily`, `weekly`, `fortnightly`, `monthly`, `quarterly`, `yearly`, or a count and
+unit such as `3d`, `2w`, `6m`. A monthly rule that starts on the 31st falls on the last day of
+shorter months and returns to the 31st afterwards. It does not drift.
