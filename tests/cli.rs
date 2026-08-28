@@ -254,3 +254,33 @@ fn import_and_export_files() {
     let exported = env.run(&["export", "--expense"]);
     assert_eq!(exported, "date,kind,amount,currency,category,tags,note\n2024-03-01,expense,4.50,USD,uncategorised,,coffee\n");
 }
+#[test]
+fn recurring_rules_post_once() {
+    let env = Env::new();
+    let out = env.run(&[
+        "recurring",
+        "add",
+        "900",
+        "--every",
+        "monthly",
+        "--start",
+        "2024-01-31",
+        "--category",
+        "rent",
+    ]);
+    assert!(out.contains("Added recurring rule #1"), "{out}");
+    assert!(env.run(&["recurring", "list"]).contains("2024-01-31"));
+    assert!(env
+        .run(&["recurring", "run", "--dry-run"])
+        .starts_with("Would post 2"));
+    assert!(env.run(&["recurring", "run"]).starts_with("Posted 2"));
+    assert!(env.run(&["recurring", "run"]).starts_with("Nothing due"));
+    let list = env.run(&["list"]);
+    assert!(
+        list.contains("2024-01-31") && list.contains("2024-02-29"),
+        "{list}"
+    );
+    assert!(env.run(&["recurring", "list"]).contains("2024-03-31"));
+    env.run(&["recurring", "rm", "1"]);
+    assert_eq!(env.run(&["recurring"]), "No recurring rules.\n");
+}
