@@ -284,3 +284,18 @@ fn recurring_rules_post_once() {
     env.run(&["recurring", "rm", "1"]);
     assert_eq!(env.run(&["recurring"]), "No recurring rules.\n");
 }
+#[test]
+fn help_version_and_unknown_commands() {
+    let env = Env::new();
+    assert!(env.run(&[]).starts_with("ledger - track income"));
+    assert!(env.run(&["add", "--help"]).contains("USAGE"));
+    assert!(env.run(&["--version"]).starts_with("ledger "));
+    assert!(env
+        .run(&["currencies"])
+        .lines()
+        .any(|l| l.starts_with("UGX") && l.ends_with(" 0")));
+    assert!(matches!(
+        env.try_run(&["frobnicate"]),
+        Err(ledger::Error::Usage(_))
+    ));
+}
