@@ -99,3 +99,15 @@ ledger recurring run                # post everything due up to today
 Intervals: `daily`, `weekly`, `fortnightly`, `monthly`, `quarterly`, `yearly`, or a count and
 unit such as `3d`, `2w`, `6m`. A monthly rule that starts on the 31st falls on the last day of
 shorter months and returns to the 31st afterwards. It does not drift.
+
+## Import and export
+
+```sh
+ledger import statement.csv --currency KES --dry-run
+ledger import statement.csv --currency KES
+ledger export march.csv --month 2024-03
+```
+
+Import needs `date` and `amount` columns. Optional columns: `kind`, `currency`, `category`,
+`tags`, `note` (or `description`/`memo`). Without a `kind` column, negative amounts are
+expenses. An import is all or nothing: one bad row and nothing is added.
