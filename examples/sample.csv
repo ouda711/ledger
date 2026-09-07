@@ -1,0 +1,11 @@
+date,kind,amount,currency,category,tags,note
+2024-03-01,income,85000,KES,salary,,March salary
+2024-03-01,expense,35000,KES,rent,,Flat rent
+2024-03-02,expense,2340.50,KES,food/groceries,,Weekly shop
+2024-03-04,expense,450,KES,food/lunch,work,Chapati and beans
+2024-03-05,expense,1200,KES,transport,"work,client",Ride to client
+2024-03-08,expense,999,KES,subscriptions/music,,Music streaming
+2024-03-09,expense,3100,KES,food/eating-out,friends,Dinner
+2024-03-12,expense,1850.75,KES,food/groceries,,Market
+2024-03-15,expense,5000,KES,utilities/power,,Tokens
+2024-03-20,income,12000,KES,freelance,,Logo design
