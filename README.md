@@ -117,3 +117,11 @@ expenses. An import is all or nothing: one bad row and nothing is added.
 Data lives in three tab-separated files in `LEDGER_DIR`: `ledger.tsv`, `budgets.tsv` and
 `recurring.tsv`. They are plain text, safe to keep in git, and written atomically so a crash
 never leaves half a file. See [docs/FILE_FORMAT.md](docs/FILE_FORMAT.md).
+
+## Development
+
+```sh
+cargo test
+cargo clippy --all-targets
+cargo fmt --check
+```
