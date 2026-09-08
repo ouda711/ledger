@@ -111,3 +111,9 @@ ledger export march.csv --month 2024-03
 Import needs `date` and `amount` columns. Optional columns: `kind`, `currency`, `category`,
 `tags`, `note` (or `description`/`memo`). Without a `kind` column, negative amounts are
 expenses. An import is all or nothing: one bad row and nothing is added.
+
+## Storage
+
+Data lives in three tab-separated files in `LEDGER_DIR`: `ledger.tsv`, `budgets.tsv` and
+`recurring.tsv`. They are plain text, safe to keep in git, and written atomically so a crash
+never leaves half a file. See [docs/FILE_FORMAT.md](docs/FILE_FORMAT.md).
