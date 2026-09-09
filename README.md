@@ -125,3 +125,7 @@ cargo test
 cargo clippy --all-targets
 cargo fmt --check
 ```
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).
