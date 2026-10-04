@@ -1,0 +1,3 @@
+max_width = 100
+# Keep modules in dependency order in lib.rs.
+reorder_modules = false
