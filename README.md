@@ -70,6 +70,7 @@ signed decimal strings (`"-12.50"`), never JSON numbers, so no reader can turn t
 ledger summary --month 2024-03      # income, expense, net per currency
 ledger months                       # month-by-month totals
 ledger categories --depth 1         # where the money went, rolled up
+ledger summary --json               # the same totals as JSON, one object per currency
 ```
 
 ```

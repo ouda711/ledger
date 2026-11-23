@@ -330,11 +330,21 @@ use crate::report::{by_category, monthly, totals};
 
 /// `ledger summary --month 2024-03`: income, expense and net per currency.
 fn cmd_summary(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
-    args.allow(FILTER_FLAGS)?;
+    let mut allowed = FILTER_FLAGS.to_vec();
+    allowed.push("json");
+    args.allow(&allowed)?;
     let ledger = load(ctx)?;
     let filter = filter_from(args, ctx)?;
     let rows = select(ledger.transactions(), &filter);
     let sums = totals(&rows)?;
+    if args.switch("json") {
+        let objects = sums
+            .iter()
+            .map(crate::json::totals)
+            .collect::<Result<Vec<_>>>()?;
+        write!(out, "{}", crate::json::array(&objects))?;
+        return Ok(());
+    }
     if sums.is_empty() {
         writeln!(out, "No transactions.")?;
         return Ok(());
@@ -668,7 +678,7 @@ COMMANDS:
     show <id>               Show one transaction
     edit <id>               Change a transaction
     rm <id>                 Delete a transaction
-    summary                 Income, expense and net per currency
+    summary                 Income, expense and net per currency (--json)
     months                  Month-by-month totals
     categories              Totals by category (--depth N to roll up)
     budget                  Budget report (--month YYYY-MM)
