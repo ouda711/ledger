@@ -10,6 +10,7 @@ pub mod category;
 pub mod txn;
 pub mod store;
 pub mod csv;
+pub mod json;
 pub mod query;
 pub mod report;
 pub mod table;
