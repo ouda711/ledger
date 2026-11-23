@@ -299,3 +299,33 @@ fn help_version_and_unknown_commands() {
         Err(ledger::Error::Usage(_))
     ));
 }
+
+#[test]
+fn list_as_json() {
+    let env = Env::new();
+    assert_eq!(env.run(&["list", "--json"]), "[]\n");
+    env.run(&[
+        "add",
+        "4.50",
+        "--category",
+        "coffee",
+        "--date",
+        "2024-03-01",
+    ]);
+    env.run(&[
+        "add",
+        "100",
+        "--income",
+        "--currency",
+        "KES",
+        "--date",
+        "2024-03-02",
+    ]);
+    let out = env.run(&["list", "--json", "--income"]);
+    assert_eq!(
+        out,
+        "[\n  {\"id\":2,\"date\":\"2024-03-02\",\"kind\":\"income\",\"amount\":\"100.00\",\"currency\":\"KES\",\"category\":\"uncategorised\",\"tags\":[],\"note\":\"\"}\n]\n"
+    );
+    assert_eq!(env.run(&["list", "--json"]).lines().count(), 4);
+    assert!(env.try_run(&["summary", "--json"]).is_err());
+}

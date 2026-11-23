@@ -2,7 +2,7 @@ use crate::error::{Error, Result};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Flags that take no value.
-const SWITCHES: &[&str] = &["income", "expense", "help", "dry-run", "version"];
+const SWITCHES: &[&str] = &["income", "expense", "help", "dry-run", "version", "json"];
 
 /// Parsed arguments: a command, positional words, `--flag value` pairs and `--switch`es.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -197,7 +197,7 @@ use crate::table::{truncate, Align, Table};
 /// `ledger list --month 2024-03 --category food`
 fn cmd_list(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
     let mut allowed = FILTER_FLAGS.to_vec();
-    allowed.push("limit");
+    allowed.extend(["limit", "json"]);
     args.allow(&allowed)?;
     let ledger = load(ctx)?;
     let filter = filter_from(args, ctx)?;
@@ -208,6 +208,14 @@ fn cmd_list(args: &Args, ctx: &Context, out: &mut dyn Write) -> Result<()> {
             .map_err(|_| Error::Usage(format!("--limit '{limit}' is not a number")))?;
         let skip = rows.len().saturating_sub(n);
         rows.drain(..skip);
+    }
+    if args.switch("json") {
+        let objects = rows
+            .iter()
+            .map(|t| crate::json::transaction(t))
+            .collect::<Result<Vec<_>>>()?;
+        write!(out, "{}", crate::json::array(&objects))?;
+        return Ok(());
     }
     if rows.is_empty() {
         writeln!(out, "No transactions.")?;
@@ -656,7 +664,7 @@ USAGE:
 
 COMMANDS:
     add <amount>            Record a transaction (expense unless --income)
-    list                    Show transactions
+    list                    Show transactions (--json for scripts)
     show <id>               Show one transaction
     edit <id>               Change a transaction
     rm <id>                 Delete a transaction

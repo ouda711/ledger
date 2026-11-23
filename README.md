@@ -61,6 +61,9 @@ ledger edit 12 --amount 500 --note "Lunch with team"
 ledger rm 12
 ```
 
+`ledger list --json` prints the same transactions as a JSON array for scripts. Amounts are
+signed decimal strings (`"-12.50"`), never JSON numbers, so no reader can turn them into floats.
+
 ## Reports
 
 ```sh
