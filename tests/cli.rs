@@ -327,5 +327,17 @@ fn list_as_json() {
         "[\n  {\"id\":2,\"date\":\"2024-03-02\",\"kind\":\"income\",\"amount\":\"100.00\",\"currency\":\"KES\",\"category\":\"uncategorised\",\"tags\":[],\"note\":\"\"}\n]\n"
     );
     assert_eq!(env.run(&["list", "--json"]).lines().count(), 4);
-    assert!(env.try_run(&["summary", "--json"]).is_err());
+}
+
+#[test]
+fn summary_as_json() {
+    let env = Env::new();
+    assert_eq!(env.run(&["summary", "--json"]), "[]\n");
+    env.run(&["add", "100", "--income"]);
+    env.run(&["add", "30.25"]);
+    env.run(&["add", "500", "--currency", "UGX"]);
+    assert_eq!(
+        env.run(&["summary", "--json"]),
+        "[\n  {\"currency\":\"UGX\",\"income\":\"0\",\"expense\":\"500\",\"net\":\"-500\"},\n  {\"currency\":\"USD\",\"income\":\"100.00\",\"expense\":\"30.25\",\"net\":\"69.75\"}\n]\n"
+    );
 }

@@ -4,6 +4,7 @@
 //! as 64-bit floats, which would quietly turn `0.10` into `0.1000000000000000055…`.
 
 use crate::error::Result;
+use crate::report::Totals;
 use crate::txn::Transaction;
 use std::fmt::Write;
 
@@ -55,4 +56,15 @@ pub fn array(objects: &[String]) -> String {
         return "[]\n".to_string();
     }
     format!("[\n  {}\n]\n", objects.join(",\n  "))
+}
+
+/// One currency's totals as a JSON object, with `net` worked out.
+pub fn totals(t: &Totals) -> Result<String> {
+    Ok(format!(
+        "{{\"currency\":{},\"income\":{},\"expense\":{},\"net\":{}}}",
+        string(&t.currency),
+        string(&t.income.to_decimal()),
+        string(&t.expense.to_decimal()),
+        string(&t.net()?.to_decimal()),
+    ))
 }
